@@ -16,6 +16,7 @@ func main() {
 		} else {
 			fmt.Println(hand)
 			partitions := models.CalculateAllPartitions(hand)
+			fmt.Printf("Number of partitions: %d\n", len(partitions))
 			for _, p := range partitions[:5] {
 				fmt.Println(p)
 			}

@@ -12,6 +12,14 @@ type Mentsu struct {
 	suit     Suit
 }
 
+func (m Mentsu) String() string {
+	tileStrings := make([]string, len(m.tiles))
+	for i, tile := range m.tiles {
+		tileStrings[i] = tile.String()
+	}
+	return strings.Join(tileStrings, " ")
+}
+
 type MultipleSuitError struct{}
 
 func (m *MultipleSuitError) Error() string {
@@ -83,12 +91,4 @@ func checkValid(m *Mentsu) (bool, error) {
 		return true, nil
 	}
 	return false, &InvalidGroupError{}
-}
-
-func (m *Mentsu) String() string {
-	tileStrings := make([]string, len(m.tiles))
-	for _, tile := range m.tiles {
-		tileStrings = append(tileStrings, tile.String())
-	}
-	return strings.Join(tileStrings, "")
 }

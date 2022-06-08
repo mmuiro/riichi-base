@@ -51,11 +51,11 @@ func CreateTile(suit Suit, value int, red bool) *Tile {
 	return t
 }
 
-func (t *Tile) isHonor() bool {
+func (t Tile) isHonor() bool {
 	return t.suit >= Ton && t.suit <= Chun
 }
 
-func (t *Tile) equals(other *Tile) bool {
+func (t Tile) equals(other *Tile) bool {
 	suit_check := t.suit == other.suit
 	if t.isHonor() {
 		return suit_check
@@ -63,6 +63,6 @@ func (t *Tile) equals(other *Tile) bool {
 	return suit_check && t.value == other.value
 }
 
-func (t *Tile) String() string {
-	return TileToString[TileToID(t)]
+func (t Tile) String() string {
+	return TileToString[TileToID(&t)]
 }

@@ -15,10 +15,18 @@ type Partition struct {
 
 func (p Partition) String() string {
 	mentsuStrings := make([]string, len(p.Mentsu))
-	for _, mentsu := range p.Mentsu {
-		mentsuStrings = append(mentsuStrings, mentsu.String())
+	for i, mentsu := range p.Mentsu {
+		mentsuStrings[i] = mentsu.String()
 	}
-	return strings.Join(mentsuStrings, "   ")
+	return strings.Join(mentsuStrings, "  ")
+}
+
+func (p Partition) TotalTiles() int {
+	sum := 0
+	for _, p := range p.Mentsu {
+		sum += len(p.tiles)
+	}
+	return sum
 }
 
 type Hand struct {
@@ -28,12 +36,16 @@ type Hand struct {
 	melds  []Mentsu
 }
 
-func (h *Hand) String() string {
+func (h Hand) String() string {
 	tileStrings := make([]string, len(h.tiles))
-	for _, tile := range h.tiles {
-		tileStrings = append(tileStrings, tile.String())
+	for i, tile := range h.tiles {
+		tileStrings[i] = tile.String()
 	}
 	return strings.Join(tileStrings, " ")
+}
+
+func (h Hand) Tiles() []Tile {
+	return h.tiles
 }
 
 type InvalidHandError struct{}
@@ -228,7 +240,8 @@ func calculatePartitionsFromTiles(rest []Tile, memo map[string][][]Mentsu) [][]M
 		results = append(results, []Mentsu{})
 		return results
 	}
-	if memoResult, ok := memo[TilesToString(rest)]; ok {
+	key := TilesToString(rest)
+	if memoResult, ok := memo[key]; ok {
 		return memoResult
 	}
 	currentTile := rest[0]
@@ -265,7 +278,7 @@ func calculatePartitionsFromTiles(rest []Tile, memo map[string][][]Mentsu) [][]M
 			results, _, _ = removeAndGetPartitions(results, nextRest, index, []Tile{currentTile}, memo)
 		}
 	}
-	memo[TilesToString(rest)] = results
+	copy(memo[key], results)
 	return results
 }
 
