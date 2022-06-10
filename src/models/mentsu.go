@@ -1,15 +1,28 @@
 package models
 
 import (
-	"sort"
 	"strings"
+)
+
+type MentsuType int
+
+const (
+	Toitsu MentsuType = iota
+	Shuntsu
+	Koutsu
+	Kantsu
+	Single
+	Ryanmen
+	Kanchan
+	Penchan
 )
 
 type Mentsu struct {
 	tiles    []Tile
 	open     bool
 	complete bool
-	suit     Suit
+	suit     SuitType
+	kind     MentsuType
 }
 
 func (m Mentsu) String() string {
@@ -17,7 +30,8 @@ func (m Mentsu) String() string {
 	for i, tile := range m.tiles {
 		tileStrings[i] = tile.String()
 	}
-	return strings.Join(tileStrings, " ")
+	ret := strings.Join(tileStrings, " ")
+	return ret
 }
 
 type MultipleSuitError struct{}
@@ -34,61 +48,72 @@ func (m *InvalidGroupError) Error() string {
 
 // Creates a group with the given tiles, if they form a valid one.
 func CreateMentsu(tiles []Tile, open bool) (*Mentsu, error) {
-	sort.Slice(tiles, func(i, j int) bool {
-		return tiles[i].suit < tiles[j].suit || tiles[i].value < tiles[j].value
-	}) // leave the sorting to the thing that provides tiles?
 	mentsu := &Mentsu{tiles: tiles, open: open}
-	if check, err := checkValid(mentsu); !check {
+	if check, err := checkAndAssignKind(mentsu); !check {
 		return nil, err
 	}
-	mentsu.suit = tiles[0].suit
+	mentsu.suit = tiles[0].Suit
 	return mentsu, nil
 }
 
-// Returns if the given group is a set (triplet or quad).
-func checkSet(m *Mentsu) bool {
-	if len(m.tiles) == 3 {
-		return m.tiles[0].equals(&m.tiles[1]) && m.tiles[0].equals(&m.tiles[2])
-	} else if len(m.tiles) == 4 {
-		return m.tiles[0].equals(&m.tiles[1]) && m.tiles[0].equals(&m.tiles[2]) && m.tiles[0].equals(&m.tiles[3])
-	}
-	return false
+// Returns if the given group is a triplet.
+func checkKoutsu(m *Mentsu) bool {
+	return len(m.tiles) == 3 && m.tiles[0].Equals(&m.tiles[1]) && m.tiles[0].Equals(&m.tiles[2])
+}
+
+// Returns if the given group is a quad.
+func checkKantsu(m *Mentsu) bool {
+	return len(m.tiles) == 4 && m.tiles[0].Equals(&m.tiles[1]) && m.tiles[0].Equals(&m.tiles[2]) && m.tiles[0].Equals(&m.tiles[3])
 }
 
 // Returns if the given group is a pair.
-func checkPair(m *Mentsu) bool {
-	return len(m.tiles) == 2 && m.tiles[0].equals(&m.tiles[1])
+func checkToitsu(m *Mentsu) bool {
+	return len(m.tiles) == 2 && m.tiles[0].Equals(&m.tiles[1])
 }
 
 // Returns if the given group is a sequence. Assumes tiles are of the same suit.
-func checkSequence(m *Mentsu) bool {
-	return len(m.tiles) == 3 && m.tiles[1].value == m.tiles[0].value+1 && m.tiles[2].value == m.tiles[1].value+1
+func checkShuntsu(m *Mentsu) bool {
+	return len(m.tiles) == 3 && m.tiles[1].Value == m.tiles[0].Value+1 && m.tiles[2].Value == m.tiles[1].Value+1
 }
 
-func checkProtoSequence(m *Mentsu) bool {
-	return len(m.tiles) == 2 && m.tiles[1].value == m.tiles[0].value+2 || m.tiles[1].value == m.tiles[0].value+1
+// Returns if the given group is a ryanmen(side) wait proto-sequence.
+func checkRyanmen(m *Mentsu) bool {
+	return len(m.tiles) == 2 && m.tiles[1].Value == m.tiles[0].Value+1 && 1 < m.tiles[0].Value && m.tiles[0].Value < 8
 }
 
+// Returns if the given group is a kanchan(closed) wait proto-sequence.
+func checkKanchan(m *Mentsu) bool {
+	return len(m.tiles) == 2 && m.tiles[1].Value == m.tiles[0].Value+2
+}
+
+// Returns if the given group is a penchan(edge) wait proto-sequence.
+func checkPenchan(m *Mentsu) bool {
+	return len(m.tiles) == 2 && m.tiles[1].Value == m.tiles[0].Value+1 && (m.tiles[0].Value == 1 || m.tiles[1].Value == 9)
+}
+
+// Returns if the given group is a single tile.
 func checkSingle(m *Mentsu) bool {
 	return len(m.tiles) == 1
 }
 
-// Returns if the given group is valid.
-func checkValid(m *Mentsu) (bool, error) {
+// Returns if the given group is valid. If so, also assigns the group kind to the group.
+func checkAndAssignKind(m *Mentsu) (bool, error) {
 	if len(m.tiles) > 4 {
 		return false, &InvalidGroupError{}
 	}
-	unique_suits := make(map[Suit]bool)
+	unique_suits := make(map[SuitType]bool)
 	for _, tile := range m.tiles {
-		unique_suits[tile.suit] = true
+		unique_suits[tile.Suit] = true
 	}
 	if len(unique_suits) != 1 {
 		return false, &MultipleSuitError{}
 	}
-	if checkPair(m) || checkSequence(m) || checkSet(m) {
-		return true, nil
-	} else if checkSingle(m) || checkProtoSequence(m) {
-		return true, nil
+	checks := [](func(m *Mentsu) bool){checkToitsu, checkShuntsu, checkKoutsu, checkKantsu, checkSingle, checkRyanmen, checkKanchan, checkPenchan}
+	for i, f := range checks {
+		if f(m) {
+			m.kind = MentsuType(i)
+			return true, nil
+		}
 	}
 	return false, &InvalidGroupError{}
 }

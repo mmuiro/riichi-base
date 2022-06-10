@@ -1,9 +1,9 @@
 package models
 
-type Suit int
+type SuitType int
 
 const (
-	Man Suit = iota
+	Man SuitType = iota
 	Sou
 	Pin
 	Ton
@@ -22,23 +22,23 @@ var TileToString = [34]string{
 	"🀀", "🀁", "🀂", "🀃", "🀆", "🀅", "🀄",
 }
 
-var SuitToString = map[Suit]string{
+var SuitToString = map[SuitType]string{
 	Man: "m",
 	Sou: "s",
 	Pin: "p",
 }
 
 type Tile struct {
-	suit  Suit
-	value int
-	red   bool
+	Suit  SuitType
+	Value int
+	Red   bool
 }
 
 func TileToID(t *Tile) int {
-	return SuitAndValueToID(t.suit, t.value)
+	return SuitAndValueToID(t.Suit, t.Value)
 }
 
-func SuitAndValueToID(suit Suit, value int) int {
+func SuitAndValueToID(suit SuitType, value int) int {
 	if suit < Ton {
 		return (int(suit))*9 + value - 1
 	} else {
@@ -46,21 +46,21 @@ func SuitAndValueToID(suit Suit, value int) int {
 	}
 }
 
-func CreateTile(suit Suit, value int, red bool) *Tile {
-	t := &Tile{suit: suit, value: value, red: red}
+func CreateTile(suit SuitType, value int, red bool) *Tile {
+	t := &Tile{Suit: suit, Value: value, Red: red}
 	return t
 }
 
-func (t Tile) isHonor() bool {
-	return t.suit >= Ton && t.suit <= Chun
+func (t Tile) IsHonor() bool {
+	return t.Suit >= Ton && t.Suit <= Chun
 }
 
-func (t Tile) equals(other *Tile) bool {
-	suit_check := t.suit == other.suit
-	if t.isHonor() {
+func (t Tile) Equals(other *Tile) bool {
+	suit_check := t.Suit == other.Suit
+	if t.IsHonor() {
 		return suit_check
 	}
-	return suit_check && t.value == other.value
+	return suit_check && t.Value == other.Value
 }
 
 func (t Tile) String() string {
