@@ -177,11 +177,15 @@ func TilesToString(tiles []Tile) string {
 }
 
 func CheckComplete(h *Hand) (bool, []Partition) {
+	if len(h.tiles) < 14 {
+		return false, nil
+	}
 	completePartitions := make([]Partition, 0)
 	complete := false
 	for _, partition := range CalculateAllPartitions(h) {
-		if CheckStandard(partition) || CheckChiiToitsu(partition) || CheckKokushi(partition) {
+		if CheckStandard(&partition) || CheckChiiToitsu(&partition) || CheckKokushi(&partition) {
 			completePartitions = append(completePartitions, partition)
+			complete = true
 		}
 	}
 	return complete, completePartitions

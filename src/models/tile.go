@@ -9,6 +9,8 @@ var TileToString = [34]string{
 	"🀀", "🀁", "🀂", "🀃", "🀆", "🀅", "🀄",
 }
 
+var KokushiTileIDs = []int{0, 8, 9, 17, 18, 26, 27, 28, 29, 30, 31, 32, 33}
+
 type Tile struct {
 	Suit  suits.Suit
 	Value int

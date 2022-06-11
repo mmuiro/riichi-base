@@ -1,9 +1,9 @@
 package waits
 
-type Wait int
+type WaitKind int
 
 const (
-	Ryanmen Wait = iota
+	Ryanmen WaitKind = iota
 	Kanchan
 	Penchan
 	Shanpon

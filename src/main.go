@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 	"riichi-calculator/src/models"
 	"strings"
@@ -22,11 +21,16 @@ func main() {
 		} else {
 			fmt.Println(hand)
 			start := time.Now()
-			partitions := models.CalculateAllPartitions(hand)
+			found, complete_partitions := models.CheckComplete(hand)
 			end := time.Now()
-			fmt.Printf("Calculated %d partitions in %f seconds.\n", len(partitions), end.Sub(start).Seconds())
-			for i := 0; i < int(math.Min(float64(len(partitions)), 5)); i++ {
-				fmt.Println(partitions[i])
+			fmt.Printf("Found %d complete partitions in %f seconds.\n", len(complete_partitions), end.Sub(start).Seconds())
+			// fmt.Printf("Calculated %d partitions in %f seconds.\n", len(partitions), end.Sub(start).Seconds())
+			if found {
+				for _, partition := range complete_partitions {
+					fmt.Println(partition)
+				}
+			} else {
+				fmt.Println("The given hand is incomplete.")
 			}
 		}
 	}

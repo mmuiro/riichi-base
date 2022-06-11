@@ -1,13 +1,17 @@
 package models
 
 import (
+	"riichi-calculator/src/models/constants/groups"
+	"riichi-calculator/src/models/constants/waits"
 	"riichi-calculator/src/utils"
 	"sort"
 	"strings"
 )
 
 type Partition struct {
-	Mentsu []Mentsu
+	Mentsu       []Mentsu
+	mentsuCounts map[groups.MentsuType]int
+	Wait         waits.WaitKind
 }
 
 func (p Partition) String() string {
@@ -53,7 +57,7 @@ func CalculateAllPartitions(h *Hand) []Partition {
 	}
 	memo := make(map[string][][]Mentsu)
 	for _, partition := range calculatePartitionsFromTiles(nonMeldTiles, memo) {
-		newPartition := Partition{append(partition, h.melds...)}
+		newPartition := Partition{Mentsu: append(partition, h.melds...)}
 		results = append(results, newPartition)
 	}
 	sort.Slice(results, func(i, j int) bool {
@@ -120,14 +124,107 @@ func removeAndGetPartitions(results [][]Mentsu, rest []Tile, index int, mentsuTi
 	return results, rest, nextTile
 }
 
+// Hand Completion Checks
+
+func checkAndAssignMentsuCounts(p *Partition) {
+	if p.mentsuCounts == nil {
+		p.mentsuCounts = make(map[groups.MentsuType]int)
+		for _, mentsu := range p.Mentsu {
+			p.mentsuCounts[mentsu.kind]++
+		}
+	}
+}
+
+// Checks whether the given hand partition has 1 pair and 4 other complete groups (sets and sequences).
 func CheckStandard(p *Partition) bool {
-
+	checkAndAssignMentsuCounts(p)
+	return len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
+		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 4
 }
 
+// Checks whether the given hand partition has Chii Toitsu (7 pairs).
 func CheckChiiToitsu(p *Partition) bool {
-
+	return len(p.Mentsu) == 7 && utils.All(utils.FuncMap(func(m Mentsu) bool {
+		return m.kind == groups.Toitsu
+	}, p.Mentsu))
 }
 
+// Checks whether the given hand partition has Kokushi Musou (13 orphans).
 func CheckKokushi(p *Partition) bool {
+	// it is a bit inefficient.
+	if len(p.Tiles()) != 14 || len(p.Mentsu) != 13 {
+		return false
+	}
+	includedKokushiTiles := make(map[int]bool)
+	for _, tile := range p.Tiles() {
+		id := TileToID(&tile)
+		if !utils.Contains(KokushiTileIDs, id) {
+			return false
+		}
+		includedKokushiTiles[id] = true
+	}
+	for _, id := range KokushiTileIDs {
+		if !includedKokushiTiles[id] {
+			return false
+		}
+	}
+	return true
+}
 
+// Tenpai Checks
+
+func CheckRyanmen(p *Partition) bool {
+	checkAndAssignMentsuCounts(p)
+	return len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
+		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
+		p.mentsuCounts[groups.Ryanmen] == 1
+}
+
+func CheckKanchan(p *Partition) bool {
+	checkAndAssignMentsuCounts(p)
+	return len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
+		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
+		p.mentsuCounts[groups.Kanchan] == 1
+}
+
+func CheckPenchan(p *Partition) bool {
+	checkAndAssignMentsuCounts(p)
+	return len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
+		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
+		p.mentsuCounts[groups.Penchan] == 1
+}
+
+func CheckShanpon(p *Partition) bool {
+	checkAndAssignMentsuCounts(p)
+	return len(p.Mentsu) == 5 &&
+		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
+		p.mentsuCounts[groups.Toitsu] == 2
+}
+
+func CheckTanki(p *Partition) bool {
+	checkAndAssignMentsuCounts(p)
+	return len(p.Mentsu) == 5 &&
+		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 4
+}
+
+func CheckKokushiSingle(p *Partition) bool {
+	// it is a bit inefficient.
+	if len(p.Tiles()) != 13 || len(p.Mentsu) != 12 {
+		return false
+	}
+	includedKokushiTiles := make(map[int]bool)
+	for _, tile := range p.Tiles() {
+		id := TileToID(&tile)
+		if !utils.Contains(KokushiTileIDs, id) {
+			return false
+		}
+		includedKokushiTiles[id] = true
+	}
+	missing := 0
+	for _, id := range KokushiTileIDs {
+		if !includedKokushiTiles[id] {
+			missing += 1
+		}
+	}
+	return missing == 1
 }

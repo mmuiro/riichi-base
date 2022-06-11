@@ -17,6 +17,15 @@ func All(list []bool) bool {
 	return true
 }
 
+func Contains[T comparable](s []T, item T) bool {
+	for _, v := range s {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}
+
 func RemoveIndex[T interface{}](s []T, i int) []T {
 	return append(s[:i], s[i+1:]...)
 }
