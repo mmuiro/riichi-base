@@ -3,6 +3,7 @@ package models
 import (
 	"riichi-calculator/src/models/constants/groups"
 	"riichi-calculator/src/models/constants/suits"
+	"sort"
 	"strings"
 )
 
@@ -43,6 +44,17 @@ func CreateMentsu(tiles []Tile, open bool) (*Mentsu, error) {
 	}
 	mentsu.suit = tiles[0].Suit
 	return mentsu, nil
+}
+
+func (m *Mentsu) addTile(t *Tile) error {
+	m.tiles = append(m.tiles, *t)
+	sort.Slice(m.tiles, func(i, j int) bool {
+		return TileToID(&m.tiles[i]) < TileToID(&m.tiles[j])
+	})
+	if check, err := checkAndAssignKind(m); !check {
+		return err
+	}
+	return nil
 }
 
 // Returns if the given group is a triplet.

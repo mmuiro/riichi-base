@@ -171,60 +171,142 @@ func CheckKokushi(p *Partition) bool {
 	return true
 }
 
-// Tenpai Checks
+/*
+Tenpai Checks
+These functions will check if the partition is in a kind of wait;
+if it is, then it also returns the waiting tiles' ids.
+*/
 
-func CheckRyanmen(p *Partition) bool {
+func CheckRyanmen(p *Partition) (bool, []int) {
 	checkAndAssignMentsuCounts(p)
-	return len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
+	cond := len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
 		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
 		p.mentsuCounts[groups.Ryanmen] == 1
+	if cond {
+		for _, mentsu := range p.Mentsu {
+			if mentsu.kind == groups.Ryanmen {
+				waits := []int{TileToID(&mentsu.tiles[0]) - 1, TileToID(&mentsu.tiles[1]) + 1}
+				return cond, waits
+			}
+		}
+	}
+	return cond, nil
 }
 
-func CheckKanchan(p *Partition) bool {
+func CheckKanchan(p *Partition) (bool, []int) {
 	checkAndAssignMentsuCounts(p)
-	return len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
+	cond := len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
 		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
 		p.mentsuCounts[groups.Kanchan] == 1
+	if cond {
+		for _, mentsu := range p.Mentsu {
+			if mentsu.kind == groups.Kanchan {
+				waits := []int{TileToID(&mentsu.tiles[0]) + 1}
+				return cond, waits
+			}
+		}
+	}
+	return cond, nil
 }
 
-func CheckPenchan(p *Partition) bool {
+func CheckPenchan(p *Partition) (bool, []int) {
 	checkAndAssignMentsuCounts(p)
-	return len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
+	cond := len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
 		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
 		p.mentsuCounts[groups.Penchan] == 1
+	if cond {
+		for _, mentsu := range p.Mentsu {
+			if mentsu.kind == groups.Penchan {
+				var wait int
+				if mentsu.tiles[0].Value == 1 {
+					wait = TileToID(&mentsu.tiles[0]) + 2
+				} else {
+					wait = TileToID(&mentsu.tiles[0]) - 1
+				}
+				return cond, []int{wait}
+			}
+		}
+	}
+	return cond, nil
 }
 
-func CheckShanpon(p *Partition) bool {
+func CheckShanpon(p *Partition) (bool, []int) {
 	checkAndAssignMentsuCounts(p)
-	return len(p.Mentsu) == 5 &&
+	cond := len(p.Mentsu) == 5 &&
 		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
 		p.mentsuCounts[groups.Toitsu] == 2
+	if cond {
+		waits := make([]int, 0)
+		for _, mentsu := range p.Mentsu {
+			if mentsu.kind == groups.Toitsu {
+				waits = append(waits, TileToID(&mentsu.tiles[0]))
+			}
+		}
+		return cond, waits
+	}
+	return cond, nil
 }
 
-func CheckTanki(p *Partition) bool {
+func CheckTanki(p *Partition) (bool, []int) {
 	checkAndAssignMentsuCounts(p)
-	return len(p.Mentsu) == 5 &&
-		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 4
+	cond := (len(p.Mentsu) == 5 &&
+		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 4) ||
+		(len(p.Mentsu) == 7 && p.mentsuCounts[groups.Toitsu] == 6 && p.mentsuCounts[groups.Single] == 1)
+	if cond {
+		for _, mentsu := range p.Mentsu {
+			if mentsu.kind == groups.Single {
+				return cond, []int{TileToID(&mentsu.tiles[0])}
+			}
+		}
+	}
+	return cond, nil
 }
 
-func CheckKokushiSingle(p *Partition) bool {
+func CheckKokushiSingle(p *Partition) (bool, []int) {
 	// it is a bit inefficient.
 	if len(p.Tiles()) != 13 || len(p.Mentsu) != 12 {
-		return false
+		return false, nil
 	}
 	includedKokushiTiles := make(map[int]bool)
 	for _, tile := range p.Tiles() {
 		id := TileToID(&tile)
 		if !utils.Contains(KokushiTileIDs, id) {
-			return false
+			return false, nil
 		}
 		includedKokushiTiles[id] = true
 	}
-	missing := 0
+	missing, wait := 0, 0
 	for _, id := range KokushiTileIDs {
 		if !includedKokushiTiles[id] {
 			missing += 1
+			wait = id
 		}
 	}
-	return missing == 1
+	if missing == 1 {
+		return true, []int{wait}
+	}
+	return false, nil
+}
+
+func CheckKokushiThirteen(p *Partition) (bool, []int) {
+	if len(p.Tiles()) != 13 || len(p.Mentsu) != 13 {
+		return false, nil
+	}
+	includedKokushiTiles := make(map[int]bool)
+	for _, tile := range p.Tiles() {
+		id := TileToID(&tile)
+		if !utils.Contains(KokushiTileIDs, id) {
+			return false, nil
+		}
+		includedKokushiTiles[id] = true
+	}
+
+	for _, id := range KokushiTileIDs {
+		if !includedKokushiTiles[id] {
+			return false, nil
+		}
+	}
+	waits := make([]int, 13)
+	copy(waits, KokushiTileIDs)
+	return true, waits
 }

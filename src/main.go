@@ -21,16 +21,18 @@ func main() {
 		} else {
 			fmt.Println(hand)
 			start := time.Now()
-			found, complete_partitions := models.CheckComplete(hand)
+			found, partitions_with_waits := models.CheckTenpai(hand)
 			end := time.Now()
-			fmt.Printf("Found %d complete partitions in %f seconds.\n", len(complete_partitions), end.Sub(start).Seconds())
+			fmt.Printf("Found tenpai partitions in %f seconds.\n", end.Sub(start).Seconds())
 			// fmt.Printf("Calculated %d partitions in %f seconds.\n", len(partitions), end.Sub(start).Seconds())
 			if found {
-				for _, partition := range complete_partitions {
-					fmt.Println(partition)
+				for wait, partitions := range partitions_with_waits {
+					for _, p := range partitions {
+						fmt.Printf("%s Waiting on %s\n", p.String(), models.TileToString[wait])
+					}
 				}
 			} else {
-				fmt.Println("The given hand is incomplete.")
+				fmt.Println("The given hand is not in tenpai.")
 			}
 		}
 	}

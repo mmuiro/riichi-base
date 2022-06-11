@@ -2,7 +2,9 @@ package models
 
 import (
 	"regexp"
+	"riichi-calculator/src/models/constants/groups"
 	"riichi-calculator/src/models/constants/suits"
+	"riichi-calculator/src/models/constants/waits"
 	"sort"
 	"strconv"
 	"strings"
@@ -11,7 +13,7 @@ import (
 type Hand struct {
 	tiles  []Tile
 	tenpai bool
-	waits  []Tile
+	waits  map[int][]Partition
 	melds  []Mentsu
 }
 
@@ -176,10 +178,65 @@ func TilesToString(tiles []Tile) string {
 	return ret
 }
 
+func CheckAgari(h *Hand, t *Tile) (bool, []Partition) {
+	if !h.tenpai {
+		return false, nil
+	}
+	tileID := TileToID(t)
+	agariPartitions := make([]Partition, 0)
+	if h.waits[tileID] != nil {
+		for _, partition := range h.waits[TileToID(t)] {
+			if partition.Wait == waits.KokushiSingle {
+				newMentsu, _ := CreateMentsu([]Tile{*t}, false)
+				partition.Mentsu = append(partition.Mentsu, *newMentsu)
+			} else {
+				var condition func(m *Mentsu) bool
+				switch partition.Wait {
+				case waits.Ryanmen:
+					condition = func(m *Mentsu) bool {
+						return m.kind == groups.Ryanmen
+					}
+				case waits.Kanchan:
+					condition = func(m *Mentsu) bool {
+						return m.kind == groups.Kanchan
+					}
+				case waits.Penchan:
+					condition = func(m *Mentsu) bool {
+						return m.kind == groups.Penchan
+					}
+				case waits.Shanpon:
+					condition = func(m *Mentsu) bool {
+						return m.kind == groups.Toitsu && m.tiles[0].Equals(t)
+					}
+				case waits.Tanki:
+					condition = func(m *Mentsu) bool {
+						return m.kind == groups.Single && m.tiles[0].Equals(t)
+					}
+				case waits.KokushiThirteen:
+					condition = func(m *Mentsu) bool {
+						return m.kind == groups.Single && m.tiles[0].Equals(t)
+					}
+				}
+				for _, m := range partition.Mentsu {
+					if condition(&m) {
+						m.addTile(t)
+						break
+					}
+				}
+			}
+			// needed or not needed based on value/reference passing...
+			agariPartitions = append(agariPartitions, partition)
+		}
+		return true, agariPartitions
+	}
+	return false, nil
+}
+
 func CheckComplete(h *Hand) (bool, []Partition) {
 	if len(h.tiles) < 14 {
 		return false, nil
 	}
+	// checking arbitrary hands (i.e. from calculator)
 	completePartitions := make([]Partition, 0)
 	complete := false
 	for _, partition := range CalculateAllPartitions(h) {
@@ -191,6 +248,21 @@ func CheckComplete(h *Hand) (bool, []Partition) {
 	return complete, completePartitions
 }
 
-func CheckTenpai(h *Hand) {
-
+func CheckTenpai(h *Hand) (bool, map[int][]Partition) {
+	waitMap := make(map[int][]Partition)
+	tenpai := false
+	checks := []func(p *Partition) (bool, []int){CheckRyanmen, CheckKanchan, CheckPenchan, CheckShanpon, CheckTanki, CheckKokushiSingle, CheckKokushiThirteen}
+	for _, partition := range CalculateAllPartitions(h) {
+		for i, check := range checks {
+			if passed, waitTileIDs := check(&partition); passed {
+				tenpai = true
+				partition.Wait = waits.WaitKind(i)
+				for _, id := range waitTileIDs {
+					waitMap[id] = append(waitMap[id], partition)
+				}
+				break
+			}
+		}
+	}
+	return tenpai, waitMap
 }

@@ -8,5 +8,6 @@ const (
 	Penchan
 	Shanpon
 	Tanki
-	Special
+	KokushiSingle
+	KokushiThirteen
 )
