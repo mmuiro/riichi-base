@@ -1,19 +1,6 @@
 package models
 
-type SuitType int
-
-const (
-	Man SuitType = iota
-	Sou
-	Pin
-	Ton
-	Nan
-	Xia
-	Pei
-	Haku
-	Hatsu
-	Chun
-)
+import "riichi-calculator/src/models/constants/suits"
 
 var TileToString = [34]string{
 	"🀇", "🀈", "🀉", "🀊", "🀋", "🀌", "🀍", "🀎", "🀏",
@@ -22,14 +9,8 @@ var TileToString = [34]string{
 	"🀀", "🀁", "🀂", "🀃", "🀆", "🀅", "🀄",
 }
 
-var SuitToString = map[SuitType]string{
-	Man: "m",
-	Sou: "s",
-	Pin: "p",
-}
-
 type Tile struct {
-	Suit  SuitType
+	Suit  suits.Suit
 	Value int
 	Red   bool
 }
@@ -38,21 +19,21 @@ func TileToID(t *Tile) int {
 	return SuitAndValueToID(t.Suit, t.Value)
 }
 
-func SuitAndValueToID(suit SuitType, value int) int {
-	if suit < Ton {
+func SuitAndValueToID(suit suits.Suit, value int) int {
+	if suit < suits.Ton {
 		return (int(suit))*9 + value - 1
 	} else {
 		return int(suit) + 24
 	}
 }
 
-func CreateTile(suit SuitType, value int, red bool) *Tile {
+func CreateTile(suit suits.Suit, value int, red bool) *Tile {
 	t := &Tile{Suit: suit, Value: value, Red: red}
 	return t
 }
 
 func (t Tile) IsHonor() bool {
-	return t.Suit >= Ton && t.Suit <= Chun
+	return t.Suit >= suits.Ton && t.Suit <= suits.Chun
 }
 
 func (t Tile) Equals(other *Tile) bool {

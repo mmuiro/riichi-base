@@ -119,3 +119,15 @@ func removeAndGetPartitions(results [][]Mentsu, rest []Tile, index int, mentsuTi
 	}
 	return results, rest, nextTile
 }
+
+func CheckStandard(p *Partition) bool {
+
+}
+
+func CheckChiiToitsu(p *Partition) bool {
+
+}
+
+func CheckKokushi(p *Partition) bool {
+
+}

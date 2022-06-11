@@ -2,12 +2,11 @@ package models
 
 import (
 	"regexp"
+	"riichi-calculator/src/models/constants/suits"
 	"sort"
 	"strconv"
 	"strings"
 )
-
-type TileCounts [34]int
 
 type Hand struct {
 	tiles  []Tile
@@ -46,12 +45,6 @@ func (e *RedDoraError) Error() string {
 	return "There can only be one red five per suit."
 }
 
-var charToSuit = map[rune]SuitType{
-	'm': Man,
-	's': Sou,
-	'p': Pin,
-}
-
 func CreateHand(tiles []Tile, melds []Mentsu) *Hand {
 	sort.Slice(tiles, func(i, j int) bool {
 		return TileToID(&tiles[i]) < TileToID(&tiles[j])
@@ -63,7 +56,7 @@ func CreateHand(tiles []Tile, melds []Mentsu) *Hand {
 /* Takes a string and coverts it into a hand. */
 func StringToHand(s string) (*Hand, error) {
 	tiles, melds := make([]Tile, 0), make([]Mentsu, 0)
-	kans, redCounts := 0, make(map[SuitType]int)
+	kans, redCounts := 0, make(map[suits.Suit]int)
 	r := regexp.MustCompile(`\s+`)
 	parts := r.Split(s, -1)
 	for i, part := range parts {
@@ -99,19 +92,19 @@ func StringToHand(s string) (*Hand, error) {
 	return CreateHand(tiles, melds), nil
 }
 
-func parsePartToTiles(part string, redCounts map[SuitType]int, defaultOpen bool) ([]Tile, bool, error) {
+func parsePartToTiles(part string, redCounts map[suits.Suit]int, defaultOpen bool) ([]Tile, bool, error) {
 	tiles := make([]Tile, 0)
 	values := make([]int, 0)
 	open := defaultOpen
 	for _, c := range part {
-		suit, ok := charToSuit[c]
+		suit, ok := suits.CharToSuit[c]
 		if !ok && c == 'z' {
 			// honor tile
 			for _, v := range values {
 				if v < 1 || v > 7 {
 					return nil, open, &InvalidHonorError{}
 				}
-				suit = SuitType(v + 2)
+				suit = suits.Suit(v + 2)
 				tiles = append(tiles, *CreateTile(suit, 0, false))
 			}
 			values = make([]int, 0)
@@ -138,7 +131,7 @@ func parsePartToTiles(part string, redCounts map[SuitType]int, defaultOpen bool)
 	return tiles, open, nil
 }
 
-func getTileIndex(tiles []Tile, suit SuitType, value int) int {
+func getTileIndex(tiles []Tile, suit suits.Suit, value int) int {
 	var l, h int = 0, len(tiles) - 1
 	var m int
 	for h >= l {
@@ -159,7 +152,7 @@ func TilesToString(tiles []Tile) string {
 	prevSuit, wasHonor := tiles[0].Suit, tiles[0].IsHonor()
 	for _, tile := range tiles {
 		if tile.Suit != prevSuit && (!tile.IsHonor() || !wasHonor) {
-			if suit, ok := SuitToString[prevSuit]; ok {
+			if suit, ok := suits.SuitToString[prevSuit]; ok {
 				ret += suit
 			} else {
 				ret += "z"
@@ -178,7 +171,22 @@ func TilesToString(tiles []Tile) string {
 	if wasHonor {
 		ret += "z"
 	} else {
-		ret += SuitToString[prevSuit]
+		ret += suits.SuitToString[prevSuit]
 	}
 	return ret
+}
+
+func CheckComplete(h *Hand) (bool, []Partition) {
+	completePartitions := make([]Partition, 0)
+	complete := false
+	for _, partition := range CalculateAllPartitions(h) {
+		if CheckStandard(partition) || CheckChiiToitsu(partition) || CheckKokushi(partition) {
+			completePartitions = append(completePartitions, partition)
+		}
+	}
+	return complete, completePartitions
+}
+
+func CheckTenpai(h *Hand) {
+
 }

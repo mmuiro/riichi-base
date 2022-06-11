@@ -1,28 +1,17 @@
 package models
 
 import (
+	"riichi-calculator/src/models/constants/groups"
+	"riichi-calculator/src/models/constants/suits"
 	"strings"
-)
-
-type MentsuType int
-
-const (
-	Toitsu MentsuType = iota
-	Shuntsu
-	Koutsu
-	Kantsu
-	Single
-	Ryanmen
-	Kanchan
-	Penchan
 )
 
 type Mentsu struct {
 	tiles    []Tile
 	open     bool
 	complete bool
-	suit     SuitType
-	kind     MentsuType
+	suit     suits.Suit
+	kind     groups.MentsuType
 }
 
 func (m Mentsu) String() string {
@@ -101,7 +90,7 @@ func checkAndAssignKind(m *Mentsu) (bool, error) {
 	if len(m.tiles) > 4 {
 		return false, &InvalidGroupError{}
 	}
-	unique_suits := make(map[SuitType]bool)
+	unique_suits := make(map[suits.Suit]bool)
 	for _, tile := range m.tiles {
 		unique_suits[tile.Suit] = true
 	}
@@ -111,7 +100,7 @@ func checkAndAssignKind(m *Mentsu) (bool, error) {
 	checks := [](func(m *Mentsu) bool){checkToitsu, checkShuntsu, checkKoutsu, checkKantsu, checkSingle, checkRyanmen, checkKanchan, checkPenchan}
 	for i, f := range checks {
 		if f(m) {
-			m.kind = MentsuType(i)
+			m.kind = groups.MentsuType(i)
 			return true, nil
 		}
 	}
