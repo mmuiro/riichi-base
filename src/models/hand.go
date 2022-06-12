@@ -11,22 +11,18 @@ import (
 )
 
 type Hand struct {
-	tiles  []Tile
-	tenpai bool
+	Tiles  []Tile
+	Tenpai bool
 	waits  map[int][]Partition
-	melds  []Mentsu
+	Melds  []Mentsu
 }
 
 func (h Hand) String() string {
-	tileStrings := make([]string, len(h.tiles))
-	for i, tile := range h.tiles {
+	tileStrings := make([]string, len(h.Tiles))
+	for i, tile := range h.Tiles {
 		tileStrings[i] = tile.String()
 	}
 	return strings.Join(tileStrings, " ")
-}
-
-func (h Hand) Tiles() []Tile {
-	return h.tiles
 }
 
 type InvalidHandError struct{}
@@ -51,7 +47,7 @@ func CreateHand(tiles []Tile, melds []Mentsu) *Hand {
 	sort.Slice(tiles, func(i, j int) bool {
 		return TileToID(&tiles[i]) < TileToID(&tiles[j])
 	})
-	h := &Hand{tiles: tiles, melds: melds}
+	h := &Hand{Tiles: tiles, Melds: melds}
 	return h
 }
 
@@ -179,7 +175,7 @@ func TilesToString(tiles []Tile) string {
 }
 
 func CheckAgari(h *Hand, t *Tile) (bool, []Partition) {
-	if !h.tenpai {
+	if !h.Tenpai {
 		return false, nil
 	}
 	tileID := TileToID(t)
@@ -194,27 +190,27 @@ func CheckAgari(h *Hand, t *Tile) (bool, []Partition) {
 				switch partition.Wait {
 				case waits.Ryanmen:
 					condition = func(m *Mentsu) bool {
-						return m.kind == groups.Ryanmen
+						return m.Kind == groups.Ryanmen
 					}
 				case waits.Kanchan:
 					condition = func(m *Mentsu) bool {
-						return m.kind == groups.Kanchan
+						return m.Kind == groups.Kanchan
 					}
 				case waits.Penchan:
 					condition = func(m *Mentsu) bool {
-						return m.kind == groups.Penchan
+						return m.Kind == groups.Penchan
 					}
 				case waits.Shanpon:
 					condition = func(m *Mentsu) bool {
-						return m.kind == groups.Toitsu && m.tiles[0].Equals(t)
+						return m.Kind == groups.Toitsu && m.Tiles[0].Equals(t)
 					}
 				case waits.Tanki:
 					condition = func(m *Mentsu) bool {
-						return m.kind == groups.Single && m.tiles[0].Equals(t)
+						return m.Kind == groups.Single && m.Tiles[0].Equals(t)
 					}
 				case waits.KokushiThirteen:
 					condition = func(m *Mentsu) bool {
-						return m.kind == groups.Single && m.tiles[0].Equals(t)
+						return m.Kind == groups.Single && m.Tiles[0].Equals(t)
 					}
 				}
 				for _, m := range partition.Mentsu {
@@ -233,7 +229,7 @@ func CheckAgari(h *Hand, t *Tile) (bool, []Partition) {
 }
 
 func CheckComplete(h *Hand) (bool, []Partition) {
-	if len(h.tiles) < 14 {
+	if len(h.Tiles) < 14 {
 		return false, nil
 	}
 	// checking arbitrary hands (i.e. from calculator)

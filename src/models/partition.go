@@ -25,7 +25,7 @@ func (p Partition) String() string {
 func (p Partition) Tiles() []Tile {
 	tiles := make([]Tile, 0)
 	for _, mentsu := range p.Mentsu {
-		tiles = append(tiles, mentsu.tiles...)
+		tiles = append(tiles, mentsu.Tiles...)
 	}
 	return tiles
 }
@@ -33,7 +33,7 @@ func (p Partition) Tiles() []Tile {
 func (p Partition) TileCount() int {
 	sum := 0
 	for _, p := range p.Mentsu {
-		sum += len(p.tiles)
+		sum += len(p.Tiles)
 	}
 	return sum
 }
@@ -42,10 +42,10 @@ func CalculateAllPartitions(h *Hand) []Partition {
 	results := make([]Partition, 0)
 	nonMeldTiles := make([]Tile, 0)
 	// buggy. needs to exclude it from the meld after it is found once.
-	for _, tile := range h.tiles {
+	for _, tile := range h.Tiles {
 		nonMeld := true
-		for _, meld := range h.melds {
-			for _, meldTile := range meld.tiles {
+		for _, meld := range h.Melds {
+			for _, meldTile := range meld.Tiles {
 				if meldTile.Equals(&tile) {
 					nonMeld = false
 				}
@@ -57,7 +57,7 @@ func CalculateAllPartitions(h *Hand) []Partition {
 	}
 	memo := make(map[string][][]Mentsu)
 	for _, partition := range calculatePartitionsFromTiles(nonMeldTiles, memo) {
-		newPartition := Partition{Mentsu: append(partition, h.melds...)}
+		newPartition := Partition{Mentsu: append(partition, h.Melds...)}
 		results = append(results, newPartition)
 	}
 	sort.Slice(results, func(i, j int) bool {
@@ -130,7 +130,7 @@ func checkAndAssignMentsuCounts(p *Partition) {
 	if p.mentsuCounts == nil {
 		p.mentsuCounts = make(map[groups.MentsuType]int)
 		for _, mentsu := range p.Mentsu {
-			p.mentsuCounts[mentsu.kind]++
+			p.mentsuCounts[mentsu.Kind]++
 		}
 	}
 }
@@ -145,7 +145,7 @@ func CheckStandard(p *Partition) bool {
 // Checks whether the given hand partition has Chii Toitsu (7 pairs).
 func CheckChiiToitsu(p *Partition) bool {
 	return len(p.Mentsu) == 7 && utils.All(utils.FuncMap(func(m Mentsu) bool {
-		return m.kind == groups.Toitsu
+		return m.Kind == groups.Toitsu
 	}, p.Mentsu))
 }
 
@@ -184,8 +184,8 @@ func CheckRyanmen(p *Partition) (bool, []int) {
 		p.mentsuCounts[groups.Ryanmen] == 1
 	if cond {
 		for _, mentsu := range p.Mentsu {
-			if mentsu.kind == groups.Ryanmen {
-				waits := []int{TileToID(&mentsu.tiles[0]) - 1, TileToID(&mentsu.tiles[1]) + 1}
+			if mentsu.Kind == groups.Ryanmen {
+				waits := []int{TileToID(&mentsu.Tiles[0]) - 1, TileToID(&mentsu.Tiles[1]) + 1}
 				return cond, waits
 			}
 		}
@@ -200,8 +200,8 @@ func CheckKanchan(p *Partition) (bool, []int) {
 		p.mentsuCounts[groups.Kanchan] == 1
 	if cond {
 		for _, mentsu := range p.Mentsu {
-			if mentsu.kind == groups.Kanchan {
-				waits := []int{TileToID(&mentsu.tiles[0]) + 1}
+			if mentsu.Kind == groups.Kanchan {
+				waits := []int{TileToID(&mentsu.Tiles[0]) + 1}
 				return cond, waits
 			}
 		}
@@ -216,12 +216,12 @@ func CheckPenchan(p *Partition) (bool, []int) {
 		p.mentsuCounts[groups.Penchan] == 1
 	if cond {
 		for _, mentsu := range p.Mentsu {
-			if mentsu.kind == groups.Penchan {
+			if mentsu.Kind == groups.Penchan {
 				var wait int
-				if mentsu.tiles[0].Value == 1 {
-					wait = TileToID(&mentsu.tiles[0]) + 2
+				if mentsu.Tiles[0].Value == 1 {
+					wait = TileToID(&mentsu.Tiles[0]) + 2
 				} else {
-					wait = TileToID(&mentsu.tiles[0]) - 1
+					wait = TileToID(&mentsu.Tiles[0]) - 1
 				}
 				return cond, []int{wait}
 			}
@@ -238,8 +238,8 @@ func CheckShanpon(p *Partition) (bool, []int) {
 	if cond {
 		waits := make([]int, 0)
 		for _, mentsu := range p.Mentsu {
-			if mentsu.kind == groups.Toitsu {
-				waits = append(waits, TileToID(&mentsu.tiles[0]))
+			if mentsu.Kind == groups.Toitsu {
+				waits = append(waits, TileToID(&mentsu.Tiles[0]))
 			}
 		}
 		return cond, waits
@@ -250,12 +250,13 @@ func CheckShanpon(p *Partition) (bool, []int) {
 func CheckTanki(p *Partition) (bool, []int) {
 	checkAndAssignMentsuCounts(p)
 	cond := (len(p.Mentsu) == 5 &&
-		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 4) ||
+		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 4 &&
+		p.mentsuCounts[groups.Single] == 1) ||
 		(len(p.Mentsu) == 7 && p.mentsuCounts[groups.Toitsu] == 6 && p.mentsuCounts[groups.Single] == 1)
 	if cond {
 		for _, mentsu := range p.Mentsu {
-			if mentsu.kind == groups.Single {
-				return cond, []int{TileToID(&mentsu.tiles[0])}
+			if mentsu.Kind == groups.Single {
+				return cond, []int{TileToID(&mentsu.Tiles[0])}
 			}
 		}
 	}
