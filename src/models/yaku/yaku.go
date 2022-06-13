@@ -5,5 +5,6 @@ import "riichi-calculator/src/models"
 type Yaku interface {
 	Match(p *models.Partition, c *Conditions) bool
 	Han(open bool) int
+	Name() string
 	Description() string
 }

@@ -10,7 +10,7 @@ import (
 
 type Partition struct {
 	Mentsu       []Mentsu
-	mentsuCounts map[groups.MentsuType]int
+	MentsuCounts map[groups.MentsuType]int
 	Wait         waits.WaitKind
 }
 
@@ -126,20 +126,20 @@ func removeAndGetPartitions(results [][]Mentsu, rest []Tile, index int, mentsuTi
 
 // Hand Completion Checks
 
-func checkAndAssignMentsuCounts(p *Partition) {
-	if p.mentsuCounts == nil {
-		p.mentsuCounts = make(map[groups.MentsuType]int)
+func CheckAndAssignMentsuCounts(p *Partition) {
+	if p.MentsuCounts == nil {
+		p.MentsuCounts = make(map[groups.MentsuType]int)
 		for _, mentsu := range p.Mentsu {
-			p.mentsuCounts[mentsu.Kind]++
+			p.MentsuCounts[mentsu.Kind]++
 		}
 	}
 }
 
 // Checks whether the given hand partition has 1 pair and 4 other complete groups (sets and sequences).
 func CheckStandard(p *Partition) bool {
-	checkAndAssignMentsuCounts(p)
-	return len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
-		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 4
+	CheckAndAssignMentsuCounts(p)
+	return len(p.Mentsu) == 5 && p.MentsuCounts[groups.Toitsu] == 1 &&
+		p.MentsuCounts[groups.Shuntsu]+p.MentsuCounts[groups.Koutsu]+p.MentsuCounts[groups.Kantsu] == 4
 }
 
 // Checks whether the given hand partition has Chii Toitsu (7 pairs).
@@ -178,10 +178,10 @@ if it is, then it also returns the waiting tiles' ids.
 */
 
 func CheckRyanmen(p *Partition) (bool, []int) {
-	checkAndAssignMentsuCounts(p)
-	cond := len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
-		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
-		p.mentsuCounts[groups.Ryanmen] == 1
+	CheckAndAssignMentsuCounts(p)
+	cond := len(p.Mentsu) == 5 && p.MentsuCounts[groups.Toitsu] == 1 &&
+		p.MentsuCounts[groups.Shuntsu]+p.MentsuCounts[groups.Koutsu]+p.MentsuCounts[groups.Kantsu] == 3 &&
+		p.MentsuCounts[groups.Ryanmen] == 1
 	if cond {
 		for _, mentsu := range p.Mentsu {
 			if mentsu.Kind == groups.Ryanmen {
@@ -194,10 +194,10 @@ func CheckRyanmen(p *Partition) (bool, []int) {
 }
 
 func CheckKanchan(p *Partition) (bool, []int) {
-	checkAndAssignMentsuCounts(p)
-	cond := len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
-		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
-		p.mentsuCounts[groups.Kanchan] == 1
+	CheckAndAssignMentsuCounts(p)
+	cond := len(p.Mentsu) == 5 && p.MentsuCounts[groups.Toitsu] == 1 &&
+		p.MentsuCounts[groups.Shuntsu]+p.MentsuCounts[groups.Koutsu]+p.MentsuCounts[groups.Kantsu] == 3 &&
+		p.MentsuCounts[groups.Kanchan] == 1
 	if cond {
 		for _, mentsu := range p.Mentsu {
 			if mentsu.Kind == groups.Kanchan {
@@ -210,10 +210,10 @@ func CheckKanchan(p *Partition) (bool, []int) {
 }
 
 func CheckPenchan(p *Partition) (bool, []int) {
-	checkAndAssignMentsuCounts(p)
-	cond := len(p.Mentsu) == 5 && p.mentsuCounts[groups.Toitsu] == 1 &&
-		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
-		p.mentsuCounts[groups.Penchan] == 1
+	CheckAndAssignMentsuCounts(p)
+	cond := len(p.Mentsu) == 5 && p.MentsuCounts[groups.Toitsu] == 1 &&
+		p.MentsuCounts[groups.Shuntsu]+p.MentsuCounts[groups.Koutsu]+p.MentsuCounts[groups.Kantsu] == 3 &&
+		p.MentsuCounts[groups.Penchan] == 1
 	if cond {
 		for _, mentsu := range p.Mentsu {
 			if mentsu.Kind == groups.Penchan {
@@ -231,10 +231,10 @@ func CheckPenchan(p *Partition) (bool, []int) {
 }
 
 func CheckShanpon(p *Partition) (bool, []int) {
-	checkAndAssignMentsuCounts(p)
+	CheckAndAssignMentsuCounts(p)
 	cond := len(p.Mentsu) == 5 &&
-		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 3 &&
-		p.mentsuCounts[groups.Toitsu] == 2
+		p.MentsuCounts[groups.Shuntsu]+p.MentsuCounts[groups.Koutsu]+p.MentsuCounts[groups.Kantsu] == 3 &&
+		p.MentsuCounts[groups.Toitsu] == 2
 	if cond {
 		waits := make([]int, 0)
 		for _, mentsu := range p.Mentsu {
@@ -248,11 +248,11 @@ func CheckShanpon(p *Partition) (bool, []int) {
 }
 
 func CheckTanki(p *Partition) (bool, []int) {
-	checkAndAssignMentsuCounts(p)
+	CheckAndAssignMentsuCounts(p)
 	cond := (len(p.Mentsu) == 5 &&
-		p.mentsuCounts[groups.Shuntsu]+p.mentsuCounts[groups.Koutsu]+p.mentsuCounts[groups.Kantsu] == 4 &&
-		p.mentsuCounts[groups.Single] == 1) ||
-		(len(p.Mentsu) == 7 && p.mentsuCounts[groups.Toitsu] == 6 && p.mentsuCounts[groups.Single] == 1)
+		p.MentsuCounts[groups.Shuntsu]+p.MentsuCounts[groups.Koutsu]+p.MentsuCounts[groups.Kantsu] == 4 &&
+		p.MentsuCounts[groups.Single] == 1) ||
+		(len(p.Mentsu) == 7 && p.MentsuCounts[groups.Toitsu] == 6 && p.MentsuCounts[groups.Single] == 1)
 	if cond {
 		for _, mentsu := range p.Mentsu {
 			if mentsu.Kind == groups.Single {
@@ -310,4 +310,29 @@ func CheckKokushiThirteen(p *Partition) (bool, []int) {
 	waits := make([]int, 13)
 	copy(waits, KokushiTileIDs)
 	return true, waits
+}
+
+func CheckJunseiChuuren(p *Partition) bool {
+	if len(p.Tiles()) != 13 {
+		return false
+	}
+	suit := p.Mentsu[0].Suit
+	for _, mentsu := range p.Mentsu {
+		if mentsu.Open || mentsu.Suit != suit {
+			return false
+		}
+	}
+	tileCounts := make([]int, 9)
+	for _, tile := range p.Tiles() {
+		tileCounts[tile.Value-1]++
+	}
+	if tileCounts[0] != 3 || tileCounts[8] != 3 {
+		return false
+	}
+	for i := 1; i < 8; i++ {
+		if tileCounts[i] != 1 {
+			return false
+		}
+	}
+	return true
 }

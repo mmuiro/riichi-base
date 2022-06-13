@@ -8,7 +8,7 @@ import (
 
 type Ittsu struct{}
 
-func (y *Ittsu) Match(p *models.Partition, c *Conditions) bool {
+func (y Ittsu) Match(p *models.Partition, c *Conditions) bool {
 	uniqueShuntsu := make(map[int]bool)
 	for _, mentsu := range p.Mentsu {
 		if mentsu.Kind == groups.Shuntsu {
@@ -23,13 +23,17 @@ func (y *Ittsu) Match(p *models.Partition, c *Conditions) bool {
 	return false
 }
 
-func (y *Ittsu) Han(open bool) int {
+func (y Ittsu) Han(open bool) int {
 	if open {
 		return 1
 	}
 	return 2
 }
 
-func (y *Ittsu) Description() string {
+func (y Ittsu) Description() string {
 	return "A full set of 3 sequences from 1 to 9 of a single suit."
+}
+
+func (y Ittsu) Name() string {
+	return "Ittsu"
 }

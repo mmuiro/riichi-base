@@ -259,6 +259,9 @@ func CheckTenpai(h *Hand) (bool, map[int][]Partition) {
 				break
 			}
 		}
+		if tenpai && CheckJunseiChuuren(&partition) {
+			partition.Wait = waits.JunseiChuuren
+		}
 	}
 	return tenpai, waitMap
 }

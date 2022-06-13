@@ -7,7 +7,7 @@ import (
 
 type SanshokuDoujun struct{}
 
-func (y *SanshokuDoujun) Match(p *models.Partition, c *Conditions) bool {
+func (y SanshokuDoujun) Match(p *models.Partition, c *Conditions) bool {
 	uniqueShuntsu := make(map[int]bool)
 	for _, mentsu := range p.Mentsu {
 		if mentsu.Kind == groups.Shuntsu {
@@ -21,13 +21,17 @@ func (y *SanshokuDoujun) Match(p *models.Partition, c *Conditions) bool {
 	return false
 }
 
-func (y *SanshokuDoujun) Han(open bool) int {
+func (y SanshokuDoujun) Han(open bool) int {
 	if open {
 		return 1
 	}
 	return 2
 }
 
-func (y *SanshokuDoujun) Description() string {
+func (y SanshokuDoujun) Description() string {
 	return "Two identical sequences on a closed hand."
+}
+
+func (y SanshokuDoujun) Name() string {
+	return "Sanshoku Doujun"
 }

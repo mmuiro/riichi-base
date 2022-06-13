@@ -8,7 +8,7 @@ import (
 
 type YakuhaiHaku struct{}
 
-func (y *YakuhaiHaku) Match(p *models.Partition, c *Conditions) bool {
+func (y YakuhaiHaku) Match(p *models.Partition, c *Conditions) bool {
 	for _, mentsu := range p.Mentsu {
 		if mentsu.Kind == groups.Kanchan || mentsu.Kind == groups.Koutsu && mentsu.Suit == suits.Haku {
 			return true
@@ -17,8 +17,12 @@ func (y *YakuhaiHaku) Match(p *models.Partition, c *Conditions) bool {
 	return false
 }
 
-func (y *YakuhaiHaku) Han(open bool) int { return 1 }
+func (y YakuhaiHaku) Han(open bool) int { return 1 }
 
-func (y *YakuhaiHaku) Description() string {
+func (y YakuhaiHaku) Description() string {
 	return "Set of Haku."
+}
+
+func (y YakuhaiHaku) Name() string {
+	return "Yakuhai: Haku."
 }
