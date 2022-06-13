@@ -23,5 +23,5 @@ func (y YakuhaiBakaze) Description() string {
 }
 
 func (y YakuhaiBakaze) Name() string {
-	return "Yakuhai: Round Wind."
+	return "Yakuhai: Round Wind"
 }

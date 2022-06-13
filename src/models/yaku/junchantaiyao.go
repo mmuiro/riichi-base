@@ -33,5 +33,5 @@ func (y JunchanTaiyao) Description() string {
 }
 
 func (y JunchanTaiyao) Name() string {
-	return "Junchan Taiyao"
+	return "Jun Chantaiyao"
 }

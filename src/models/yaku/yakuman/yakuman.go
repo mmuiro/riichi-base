@@ -11,3 +11,21 @@ type Yakuman interface {
 	Name() string
 	Description() string
 }
+
+var AllYakuman = []Yakuman{
+	Kokushi{},
+	KokushiThirteen{},
+	SuuAnkou{},
+	SuuAnkouTanki{},
+	DaiSangen{},
+	ShouSuushii{},
+	DaiSuushii{},
+	TsuuIisou{},
+	Chinroutou{},
+	RyuuIisou{},
+	Chuuren{},
+	JunseiChuuren{},
+	SuuKantsu{},
+	Tenhou{},
+	Chiihou{},
+}

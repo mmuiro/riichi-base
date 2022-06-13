@@ -29,7 +29,7 @@ func (y JunseiChuuren) Match(p *models.Partition, c *yaku.Conditions) bool {
 
 }
 
-func (y JunseiChuuren) Value(open bool) int {
+func (y JunseiChuuren) Value() int {
 	return 1
 }
 

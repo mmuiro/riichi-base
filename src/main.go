@@ -3,8 +3,14 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
+	"riichi-calculator/src/calculator"
 	"riichi-calculator/src/models"
+	"riichi-calculator/src/models/constants/suits"
+	"riichi-calculator/src/models/yaku"
+	"riichi-calculator/src/models/yaku/yakuman"
+	"riichi-calculator/src/utils"
 	"strings"
 	"time"
 )
@@ -15,25 +21,87 @@ func main() {
 	for {
 		fmt.Print("Enter Hand> ")
 		in, _ = input.ReadString('\n')
-		hand, err := models.StringToHand(strings.TrimSpace(in))
+		hand, lastTile, err := models.StringToHand(strings.TrimSpace(in))
 		if err != nil {
 			fmt.Println(err)
 		} else {
 			fmt.Println(hand)
 			start := time.Now()
-			found, partitions_with_waits := models.CheckTenpai(hand)
-			end := time.Now()
-			fmt.Printf("Found tenpai partitions in %f seconds.\n", end.Sub(start).Seconds())
-			// fmt.Printf("Calculated %d partitions in %f seconds.\n", len(partitions), end.Sub(start).Seconds())
-			if found {
-				for wait, partitions := range partitions_with_waits {
-					for _, p := range partitions {
-						fmt.Printf("%s Waiting on %s\n", p.String(), models.TileToString[wait])
+			if lastTile != nil {
+				err = hand.RemoveTile(lastTile)
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
+			}
+			if found, tenpais, waitLists := models.CheckTenpai(hand); found {
+				models.AssignWaitMap(hand, tenpais, waitLists)
+				hand.Tenpai = true
+				if lastTile != nil {
+					// calculate the score, if possible (hand has agari)
+					c := yaku.Conditions{Menzenchin: true, Jikaze: suits.Ton, Bakaze: suits.Ton} // should be customizable
+					var score int
+					var best *models.Partition
+					var yakuList []yaku.Yaku
+					var yakumanList []yakuman.Yakuman
+					var slevel string
+					var han, fu int
+					score, best, yakuList, yakumanList, han, fu, slevel, err = calculator.CalculateScoreVerbose(hand, lastTile, &c)
+					if err != nil {
+						fmt.Println(err)
+						continue
+					} else {
+						fmt.Println(best)
+						if len(yakumanList) > 0 {
+							for _, y := range yakumanList {
+								fmt.Printf("%s\n", y.Name())
+							}
+						} else {
+							for _, y := range yakuList {
+								fmt.Printf("%s - %d han\n", y.Name(), y.Han(!c.Menzenchin))
+							}
+							fmt.Printf("%d han", han)
+							if fu > 0 {
+								fmt.Printf(" %d fu", fu)
+							}
+							fmt.Println()
+						}
+						fmt.Println("--------------------------")
+						pre := ""
+						if c.Jikaze == suits.Ton {
+							pre += "Dealer "
+						}
+						if c.Tsumo {
+							pre += "Tsumo"
+						} else {
+							pre += "Ron"
+						}
+						fmt.Println(pre)
+						if slevel != "" {
+							fmt.Printf("%s - %d pts\n", slevel, score)
+						} else {
+							fmt.Printf("%d pts\n", score)
+						}
+					}
+				} else {
+					fmt.Println("The given hand is in tenpai, with the following waits:")
+					for i, p := range tenpais {
+						waitTiles := utils.FuncMap(func(id int) string {
+							return models.TileToString[id]
+						}, waitLists[i])
+						fmt.Printf("%s, waiting on %s\n", p.String(), strings.Join(waitTiles, " "))
 					}
 				}
 			} else {
-				fmt.Println("The given hand is not in tenpai.")
+				fmt.Println("The given hand is not in tenpai, nor is it complete.")
+				partitions := models.CalculateAllPartitions(hand)
+				for i := 0; i < int(math.Min(5, float64(len(partitions)))); i++ {
+					fmt.Println(partitions[i])
+				}
 			}
+			end := time.Now()
+			fmt.Printf("Calculation done in %f seconds.\n", end.Sub(start).Seconds())
+			// fmt.Printf("Calculated %d partitions in %f seconds.\n", len(partitions), end.Sub(start).Seconds())
 		}
 	}
 }

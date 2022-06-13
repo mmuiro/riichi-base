@@ -2,13 +2,22 @@ package yaku
 
 import (
 	"riichi-calculator/src/models"
+	"riichi-calculator/src/models/constants/groups"
+	"riichi-calculator/src/models/constants/suits"
 	"riichi-calculator/src/models/constants/waits"
 )
 
 type Pinfu struct{}
 
 func (y Pinfu) Match(p *models.Partition, c *Conditions) bool {
-	return c.Menzenchin && p.Wait == waits.Ryanmen
+	models.CheckAndAssignMentsuCounts(p)
+	for _, m := range p.Mentsu {
+		if m.Kind == groups.Toitsu && (m.Suit == c.Jikaze || m.Suit == c.Bakaze ||
+			m.Suit == suits.Chun || m.Suit == suits.Haku || m.Suit == suits.Hatsu) {
+			return false
+		}
+	}
+	return c.Menzenchin && p.Wait == waits.Ryanmen && p.MentsuCounts[groups.Shuntsu] == 4
 }
 
 func (y Pinfu) Han(open bool) int { return 1 }

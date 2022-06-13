@@ -13,7 +13,7 @@ func (y SuuKantsu) Match(p *models.Partition, c *yaku.Conditions) bool {
 	return p.MentsuCounts[groups.Kantsu] == 4
 }
 
-func (y SuuKantsu) Value(open bool) int {
+func (y SuuKantsu) Value() int {
 	return 1
 }
 

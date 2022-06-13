@@ -16,7 +16,7 @@ func (y YakuhaiJikaze) Match(p *models.Partition, c *Conditions) bool {
 	return false
 }
 
-func (y YakuhaiJikaze) Han() int { return 1 }
+func (y YakuhaiJikaze) Han(open bool) int { return 1 }
 
 func (y YakuhaiJikaze) Description() string {
 	return "Set of Round Wind."

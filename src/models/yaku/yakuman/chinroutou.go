@@ -14,10 +14,14 @@ func (y Chinroutou) Match(p *models.Partition, c *yaku.Conditions) bool {
 	}, p.Tiles()))
 }
 
-func (y Chinroutou) Value(open bool) int {
+func (y Chinroutou) Value() int {
 	return 1
 }
 
 func (y Chinroutou) Description() string {
+	return "All terminals"
+}
+
+func (y Chinroutou) Name() string {
 	return "Chinroutou"
 }

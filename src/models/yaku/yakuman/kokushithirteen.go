@@ -12,7 +12,7 @@ func (y KokushiThirteen) Match(p *models.Partition, c *yaku.Conditions) bool {
 	return models.CheckKokushi(p) && p.Wait == waits.KokushiThirteen
 }
 
-func (y KokushiThirteen) Value(open bool) int {
+func (y KokushiThirteen) Value() int {
 	return 2
 }
 

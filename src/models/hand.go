@@ -1,20 +1,23 @@
 package models
 
 import (
+	"fmt"
 	"regexp"
 	"riichi-calculator/src/models/constants/groups"
 	"riichi-calculator/src/models/constants/suits"
 	"riichi-calculator/src/models/constants/waits"
+	"riichi-calculator/src/utils"
 	"sort"
 	"strconv"
 	"strings"
 )
 
 type Hand struct {
-	Tiles  []Tile
-	Tenpai bool
-	waits  map[int][]Partition
-	Melds  []Mentsu
+	Tiles              []Tile
+	Tenpai             bool
+	Waits              map[int][]Partition
+	Melds              []Mentsu
+	effectiveTileCount int
 }
 
 func (h Hand) String() string {
@@ -43,6 +46,14 @@ func (e *RedDoraError) Error() string {
 	return "There can only be one red five per suit."
 }
 
+type MissingTileError struct {
+	t *Tile
+}
+
+func (e *MissingTileError) Error() string {
+	return fmt.Sprintf("The tile %s was not found.", e.t.String())
+}
+
 func CreateHand(tiles []Tile, melds []Mentsu) *Hand {
 	sort.Slice(tiles, func(i, j int) bool {
 		return TileToID(&tiles[i]) < TileToID(&tiles[j])
@@ -52,19 +63,21 @@ func CreateHand(tiles []Tile, melds []Mentsu) *Hand {
 }
 
 /* Takes a string and coverts it into a hand. */
-func StringToHand(s string) (*Hand, error) {
+func StringToHand(s string) (*Hand, *Tile, error) {
 	tiles, melds := make([]Tile, 0), make([]Mentsu, 0)
 	kans, redCounts := 0, make(map[suits.Suit]int)
 	r := regexp.MustCompile(`\s+`)
 	parts := r.Split(s, -1)
+	var lastTile Tile
 	for i, part := range parts {
 		if i == 0 {
 			// closed portion of the hand
 			closedTiles, _, err := parsePartToTiles(part, redCounts, false)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			tiles = append(tiles, closedTiles...)
+			lastTile = tiles[len(tiles)-1]
 		} else {
 			// melds (pon, chii). kans can be specified as closed; otherwise, they are open.
 			var meldTiles []Tile
@@ -73,21 +86,26 @@ func StringToHand(s string) (*Hand, error) {
 			meldTiles, open, err = parsePartToTiles(part, redCounts, true)
 			tiles = append(tiles, meldTiles...)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			var newMeld *Mentsu
 			newMeld, err = CreateMentsu(meldTiles, open)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			melds = append(melds, *newMeld)
 		}
 	}
+	// still need to deal with kans...
 	effectiveTileCount := len(tiles) - kans
 	if effectiveTileCount != 13 && effectiveTileCount != 14 {
-		return nil, &InvalidHandError{}
+		return nil, nil, &InvalidHandError{}
 	}
-	return CreateHand(tiles, melds), nil
+	hand := CreateHand(tiles, melds)
+	if effectiveTileCount == 14 {
+		return hand, &lastTile, nil
+	}
+	return hand, nil, nil
 }
 
 func parsePartToTiles(part string, redCounts map[suits.Suit]int, defaultOpen bool) ([]Tile, bool, error) {
@@ -180,8 +198,8 @@ func CheckAgari(h *Hand, t *Tile) (bool, []Partition) {
 	}
 	tileID := TileToID(t)
 	agariPartitions := make([]Partition, 0)
-	if h.waits[tileID] != nil {
-		for _, partition := range h.waits[TileToID(t)] {
+	if h.Waits[tileID] != nil {
+		for _, partition := range h.Waits[TileToID(t)] {
 			if partition.Wait == waits.KokushiSingle {
 				newMentsu, _ := CreateMentsu([]Tile{*t}, false)
 				partition.Mentsu = append(partition.Mentsu, *newMentsu)
@@ -213,9 +231,9 @@ func CheckAgari(h *Hand, t *Tile) (bool, []Partition) {
 						return m.Kind == groups.Single && m.Tiles[0].Equals(t)
 					}
 				}
-				for _, m := range partition.Mentsu {
-					if condition(&m) {
-						m.addTile(t)
+				for i := range partition.Mentsu {
+					if condition(&partition.Mentsu[i]) {
+						partition.Mentsu[i].addTile(t)
 						break
 					}
 				}
@@ -244,24 +262,56 @@ func CheckComplete(h *Hand) (bool, []Partition) {
 	return complete, completePartitions
 }
 
-func CheckTenpai(h *Hand) (bool, map[int][]Partition) {
-	waitMap := make(map[int][]Partition)
+func CheckTenpai(h *Hand) (bool, []Partition, [][]int) {
+	tenpaiPartitions, tenpaiWaits := make([]Partition, 0), make([][]int, 0)
 	tenpai := false
 	checks := []func(p *Partition) (bool, []int){CheckRyanmen, CheckKanchan, CheckPenchan, CheckShanpon, CheckTanki, CheckKokushiSingle, CheckKokushiThirteen}
 	for _, partition := range CalculateAllPartitions(h) {
+		curWaits := make([]int, 0)
 		for i, check := range checks {
 			if passed, waitTileIDs := check(&partition); passed {
 				tenpai = true
 				partition.Wait = waits.WaitKind(i)
-				for _, id := range waitTileIDs {
-					waitMap[id] = append(waitMap[id], partition)
-				}
+				curWaits = append(curWaits, waitTileIDs...)
+				tenpaiPartitions = append(tenpaiPartitions, partition)
+				tenpaiWaits = append(tenpaiWaits, curWaits)
 				break
 			}
 		}
 		if tenpai && CheckJunseiChuuren(&partition) {
+			// have to account for this when adding the last tile into a partition.
+			// probably keep it as a separate thing, rather than as a wait style.
+			// or, set the wait style AFTER adding the tile to the mentsu.
 			partition.Wait = waits.JunseiChuuren
 		}
 	}
-	return tenpai, waitMap
+	return tenpai, tenpaiPartitions, tenpaiWaits
+}
+
+func AssignWaitMap(h *Hand, partitions []Partition, waitsList [][]int) error {
+	h.Waits = make(map[int][]Partition)
+	for i, p := range partitions {
+		for _, id := range waitsList[i] {
+			h.Waits[id] = append(h.Waits[id], p)
+		}
+	}
+	return nil
+}
+
+func (h *Hand) RemoveTile(t *Tile) error {
+	if i := getTileIndex(h.Tiles, t.Suit, t.Value); i > -1 {
+		h.Tiles = utils.RemoveIndex(h.Tiles, i)
+		// check if the hand is still valid
+		return nil
+	}
+	return &MissingTileError{}
+}
+
+func (h *Hand) AddTile(t *Tile) error {
+	h.Tiles = append(h.Tiles, *t)
+	sort.Slice(h.Tiles, func(i, j int) bool {
+		return TileToID(&h.Tiles[i]) < TileToID(&h.Tiles[j])
+	})
+	// check if the hand is still valid
+	return nil
 }

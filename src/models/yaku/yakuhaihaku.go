@@ -24,5 +24,5 @@ func (y YakuhaiHaku) Description() string {
 }
 
 func (y YakuhaiHaku) Name() string {
-	return "Yakuhai: Haku."
+	return "Yakuhai: Haku"
 }

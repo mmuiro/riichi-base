@@ -15,7 +15,7 @@ func (y RyuuIisou) Match(p *models.Partition, c *yaku.Conditions) bool {
 	}, p.Tiles()))
 }
 
-func (y RyuuIisou) Value(open bool) int {
+func (y RyuuIisou) Value() int {
 	return 1
 }
 

@@ -26,7 +26,7 @@ func (y ShouSuushii) Match(p *models.Partition, c *yaku.Conditions) bool {
 		(uniqueSets[suits.Ton] && uniqueSets[suits.Nan] && uniqueSets[suits.Pei] && uniquePairs[suits.Xia])
 }
 
-func (y ShouSuushii) Value(open bool) int {
+func (y ShouSuushii) Value() int {
 	return 1
 }
 

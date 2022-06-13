@@ -8,3 +8,36 @@ type Yaku interface {
 	Name() string
 	Description() string
 }
+
+var AllYaku = []Yaku{
+	MenzenTsumo{},
+	Riichi{},
+	Ippatsu{},
+	Pinfu{},
+	Iipeikou{},
+	Haitei{},
+	Houtei{},
+	RinshanKaihou{},
+	Chankan{},
+	Tanyao{},
+	YakuhaiBakaze{},
+	YakuhaiJikaze{},
+	YakuhaiChun{},
+	YakuhaiHaku{},
+	YakuhaiHatsu{},
+	DoubleRiichi{},
+	Chanta{},
+	SanshokuDoujun{},
+	Ittsu{},
+	Toitoi{},
+	SanAnkou{},
+	SanshokuDoukou{},
+	SanKantsu{},
+	ChiiToitsu{},
+	HonRoutou{},
+	ShouSangen{},
+	Honitsu{},
+	JunchanTaiyao{},
+	Ryanpeikou{},
+	Chinitsu{},
+}

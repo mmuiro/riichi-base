@@ -11,7 +11,7 @@ func (y Chiihou) Match(p *models.Partition, c *yaku.Conditions) bool {
 	return c.Chiihou
 }
 
-func (y Chiihou) Value(open bool) int {
+func (y Chiihou) Value() int {
 	return 1
 }
 

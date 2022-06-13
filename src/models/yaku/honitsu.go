@@ -9,6 +9,7 @@ type Honitsu struct{}
 
 func (y Honitsu) Match(p *models.Partition, c *Conditions) bool {
 	flushSuit := suits.Suit(-1)
+	hasHonor := false
 	for _, mentsu := range p.Mentsu {
 		if !mentsu.Tiles[0].IsHonor() {
 			if flushSuit == -1 {
@@ -16,9 +17,11 @@ func (y Honitsu) Match(p *models.Partition, c *Conditions) bool {
 			} else if mentsu.Suit != flushSuit {
 				return false
 			}
+		} else {
+			hasHonor = true
 		}
 	}
-	return true
+	return hasHonor
 }
 
 func (y Honitsu) Han(open bool) int {

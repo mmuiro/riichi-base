@@ -29,7 +29,7 @@ func (y Chuuren) Match(p *models.Partition, c *yaku.Conditions) bool {
 
 }
 
-func (y Chuuren) Value(open bool) int {
+func (y Chuuren) Value() int {
 	return 1
 }
 

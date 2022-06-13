@@ -19,7 +19,7 @@ func (y SuuAnkouTanki) Match(p *models.Partition, c *yaku.Conditions) bool {
 	return concealedSets == 4 && p.Wait == waits.Tanki
 }
 
-func (y SuuAnkouTanki) Value(open bool) int {
+func (y SuuAnkouTanki) Value() int {
 	return 2
 }
 

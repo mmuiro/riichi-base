@@ -19,7 +19,7 @@ func (y DaiSangen) Match(p *models.Partition, c *yaku.Conditions) bool {
 	return uniqueSets[suits.Chun] && uniqueSets[suits.Haku] && uniqueSets[suits.Hatsu]
 }
 
-func (y DaiSangen) Value(open bool) int {
+func (y DaiSangen) Value() int {
 	return 1
 }
 

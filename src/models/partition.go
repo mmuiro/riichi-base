@@ -40,19 +40,13 @@ func (p Partition) TileCount() int {
 
 func CalculateAllPartitions(h *Hand) []Partition {
 	results := make([]Partition, 0)
-	nonMeldTiles := make([]Tile, 0)
-	// buggy. needs to exclude it from the meld after it is found once.
-	for _, tile := range h.Tiles {
-		nonMeld := true
-		for _, meld := range h.Melds {
-			for _, meldTile := range meld.Tiles {
-				if meldTile.Equals(&tile) {
-					nonMeld = false
-				}
+	nonMeldTiles := make([]Tile, len(h.Tiles))
+	copy(nonMeldTiles, h.Tiles)
+	for _, meld := range h.Melds {
+		for _, tile := range meld.Tiles {
+			if i := getTileIndex(nonMeldTiles, tile.Suit, tile.Value); i > -1 {
+				nonMeldTiles = utils.RemoveIndex(nonMeldTiles, i)
 			}
-		}
-		if nonMeld {
-			nonMeldTiles = append(nonMeldTiles, tile)
 		}
 	}
 	memo := make(map[string][][]Mentsu)

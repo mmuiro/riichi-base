@@ -11,7 +11,7 @@ func (y Tenhou) Match(p *models.Partition, c *yaku.Conditions) bool {
 	return c.Tenhou
 }
 
-func (y Tenhou) Value(open bool) int {
+func (y Tenhou) Value() int {
 	return 1
 }
 
