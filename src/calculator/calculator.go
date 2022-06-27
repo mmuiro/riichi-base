@@ -61,18 +61,16 @@ func CalculateFu(p *models.Partition, c *yaku.Conditions) int {
 	if p.Wait == waits.Kanchan || p.Wait == waits.Penchan || p.Wait == waits.Tanki {
 		fu += 2
 	}
+	// clean this up
 	if c.Tsumo && !pinfu {
 		fu += 2
 	} else if c.Menzenchin && !c.Tsumo {
 		fu += 10
 	}
-	if fu == 20 { // open hand ron with no bonus fu forced to 30 fu
+	if fu == 20 && !pinfu { // open hand ron with no bonus fu forced to 30 fu
 		fu += 10
 	}
-	r := fu % 10
-	if r > 0 {
-		fu += 10 - r
-	}
+	fu = roundUp(fu, 10)
 	return fu
 }
 
@@ -107,9 +105,9 @@ func CalculateScore(h *models.Hand, w *models.Tile, c *yaku.Conditions) (int, er
 }
 
 func CalculateScoreVerbose(h *models.Hand, w *models.Tile, c *yaku.Conditions) (int, *models.Partition, []yaku.Yaku, []yakuman.Yakuman, int, int, string, error) {
-	agari, partitions := models.CheckAgari(h, w)
+	agari, partitions := models.CheckAgari(h, w, c.Tsumo)
 	if !agari {
-		return 0, nil, nil, nil, 0, 0, "", &NoAgariError{}
+		return 0, nil, nil, nil, 0, 0, "", &NoAgariError{h: h}
 	}
 	maxScore := 0
 	var maxPartition models.Partition
@@ -125,7 +123,7 @@ func CalculateScoreVerbose(h *models.Hand, w *models.Tile, c *yaku.Conditions) (
 		}
 	}
 	if maxScore == 0 {
-		return 0, nil, nil, nil, 0, 0, "", &NoYakuError{}
+		return 0, nil, nil, nil, 0, 0, "", &NoYakuError{h: h}
 	}
 	return maxScore, &maxPartition, maxYakuList, maxYakumanList, maxHan, maxFu, maxSLevel, nil
 }
@@ -149,25 +147,36 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) (int, []ya
 			return 0, nil, nil, 0, 0, ""
 		}
 		// if the hand has yaku, add dora and red dora, and uradora if menzenchin
+		dora, akadora, uradora := 0, 0, 0
 		for _, tile := range p.Tiles() {
 			if tile.Red {
-				han++
+				akadora++
 			}
-			for _, dora := range c.Dora {
-				if models.TileToID(&tile) == dora {
-					han++
+			for _, d := range c.Dora {
+				if models.TileToID(&tile) == d {
+					dora++
 				}
 			}
 		}
 		if c.Riichi || c.DoubleRiichi {
 			for _, tile := range p.Tiles() {
-				for _, dora := range c.UraDora {
-					if models.TileToID(&tile) == dora {
-						han++
+				for _, d := range c.UraDora {
+					if models.TileToID(&tile) == d {
+						uradora++
 					}
 				}
 			}
 		}
+		if akadora > 0 {
+			yakuList = append(yakuList, yaku.AkaDora{Count: akadora})
+		}
+		if dora > 0 {
+			yakuList = append(yakuList, yaku.Dora{Count: dora})
+		}
+		if uradora > 0 {
+			yakuList = append(yakuList, yaku.UraDora{Count: uradora})
+		}
+		han += akadora + dora + uradora
 		// if han is 5 or more, don't calculate fu
 		slevel := HanToScoreLevel(han)
 		if han > 4 {

@@ -30,7 +30,7 @@ func (y JunseiChuuren) Match(p *models.Partition, c *yaku.Conditions) bool {
 }
 
 func (y JunseiChuuren) Value() int {
-	return 1
+	return 2
 }
 
 func (y JunseiChuuren) Description() string {

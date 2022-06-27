@@ -16,7 +16,7 @@ func (y Ittsu) Match(p *models.Partition, c *Conditions) bool {
 		}
 	}
 	for suit := suits.Man; suit <= suits.Pin; suit++ {
-		if uniqueShuntsu[int(suit)] && uniqueShuntsu[int(suit)+3] && uniqueShuntsu[int(suit)+6] {
+		if uniqueShuntsu[int(suit)*9] && uniqueShuntsu[int(suit)*9+3] && uniqueShuntsu[int(suit)*9+6] {
 			return true
 		}
 	}

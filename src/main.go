@@ -39,7 +39,7 @@ func main() {
 				hand.Tenpai = true
 				if lastTile != nil {
 					// calculate the score, if possible (hand has agari)
-					c := yaku.Conditions{Menzenchin: true, Jikaze: suits.Ton, Bakaze: suits.Ton} // should be customizable
+					c := yaku.Conditions{Menzenchin: false, Jikaze: suits.Nan, Bakaze: suits.Nan, Tsumo: false, Dora: []int{models.SuitAndValueToID(suits.Chun, 0)}} // should be customizable
 					var score int
 					var best *models.Partition
 					var yakuList []yaku.Yaku

@@ -13,5 +13,5 @@ func (y Haitei) Description() string {
 }
 
 func (y Haitei) Name() string {
-	return "Win on the last draw from the wall."
+	return "Haitei Raoyue"
 }

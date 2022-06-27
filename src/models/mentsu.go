@@ -7,22 +7,6 @@ import (
 	"strings"
 )
 
-type Mentsu struct {
-	Tiles []Tile
-	Open  bool
-	Suit  suits.Suit
-	Kind  groups.MentsuType
-}
-
-func (m Mentsu) String() string {
-	tileStrings := make([]string, len(m.Tiles))
-	for i, tile := range m.Tiles {
-		tileStrings[i] = tile.String()
-	}
-	ret := strings.Join(tileStrings, " ")
-	return ret
-}
-
 type MultipleSuitError struct{}
 
 func (m *MultipleSuitError) Error() string {
@@ -33,6 +17,22 @@ type InvalidGroupError struct{}
 
 func (m *InvalidGroupError) Error() string {
 	return "A mentsu must be a proto-sequence, single, pair, or set."
+}
+
+type Mentsu struct {
+	Tiles []Tile
+	Open  bool
+	Suit  suits.Suit
+	Kind  groups.MentsuType
+}
+
+func (m *Mentsu) String() string {
+	tileStrings := make([]string, len(m.Tiles))
+	for i, tile := range m.Tiles {
+		tileStrings[i] = tile.String()
+	}
+	ret := strings.Join(tileStrings, " ")
+	return ret
 }
 
 // Creates a group with the given tiles, if they form a valid one.

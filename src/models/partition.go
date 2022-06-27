@@ -14,7 +14,7 @@ type Partition struct {
 	Wait         waits.WaitKind
 }
 
-func (p Partition) String() string {
+func (p *Partition) String() string {
 	mentsuStrings := make([]string, len(p.Mentsu))
 	for i, mentsu := range p.Mentsu {
 		mentsuStrings[i] = mentsu.String()
@@ -22,7 +22,7 @@ func (p Partition) String() string {
 	return strings.Join(mentsuStrings, " -")
 }
 
-func (p Partition) Tiles() []Tile {
+func (p *Partition) Tiles() []Tile {
 	tiles := make([]Tile, 0)
 	for _, mentsu := range p.Mentsu {
 		tiles = append(tiles, mentsu.Tiles...)
@@ -30,7 +30,7 @@ func (p Partition) Tiles() []Tile {
 	return tiles
 }
 
-func (p Partition) TileCount() int {
+func (p *Partition) TileCount() int {
 	sum := 0
 	for _, p := range p.Mentsu {
 		sum += len(p.Tiles)
@@ -122,10 +122,14 @@ func removeAndGetPartitions(results [][]Mentsu, rest []Tile, index int, mentsuTi
 
 func CheckAndAssignMentsuCounts(p *Partition) {
 	if p.MentsuCounts == nil {
-		p.MentsuCounts = make(map[groups.MentsuType]int)
-		for _, mentsu := range p.Mentsu {
-			p.MentsuCounts[mentsu.Kind]++
-		}
+		AssignMentsuCounts(p)
+	}
+}
+
+func AssignMentsuCounts(p *Partition) {
+	p.MentsuCounts = make(map[groups.MentsuType]int)
+	for _, mentsu := range p.Mentsu {
+		p.MentsuCounts[mentsu.Kind]++
 	}
 }
 

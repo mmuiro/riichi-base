@@ -20,7 +20,7 @@ type Hand struct {
 	effectiveTileCount int
 }
 
-func (h Hand) String() string {
+func (h *Hand) String() string {
 	tileStrings := make([]string, len(h.Tiles))
 	for i, tile := range h.Tiles {
 		tileStrings[i] = tile.String()
@@ -93,6 +93,9 @@ func StringToHand(s string) (*Hand, *Tile, error) {
 			if err != nil {
 				return nil, nil, err
 			}
+			if newMeld.Kind == groups.Kantsu {
+				kans++
+			}
 			melds = append(melds, *newMeld)
 		}
 	}
@@ -114,18 +117,23 @@ func parsePartToTiles(part string, redCounts map[suits.Suit]int, defaultOpen boo
 	open := defaultOpen
 	for _, c := range part {
 		suit, ok := suits.CharToSuit[c]
-		if !ok && c == 'z' {
-			// honor tile
-			for _, v := range values {
-				if v < 1 || v > 7 {
-					return nil, open, &InvalidHonorError{}
+		if !ok {
+			if c == 'z' {
+				// honor tile
+				for _, v := range values {
+					if v < 1 || v > 7 {
+						return nil, open, &InvalidHonorError{}
+					}
+					suit = suits.Suit(v + 2)
+					tiles = append(tiles, *CreateTile(suit, 0, false))
 				}
-				suit = suits.Suit(v + 2)
-				tiles = append(tiles, *CreateTile(suit, 0, false))
+				values = make([]int, 0)
+			} else if c == 'c' {
+				// indicating closed kan (only used on parts of the second portion of string)
+				open = false
+			} else {
+				values = append(values, int(c-'0'))
 			}
-			values = make([]int, 0)
-		} else if !ok {
-			values = append(values, int(c-'0'))
 		} else {
 			for _, v := range values {
 				var newTile *Tile
@@ -192,20 +200,20 @@ func TilesToString(tiles []Tile) string {
 	return ret
 }
 
-func CheckAgari(h *Hand, t *Tile) (bool, []Partition) {
+func CheckAgari(h *Hand, t *Tile, tsumo bool) (bool, []Partition) {
 	if !h.Tenpai {
 		return false, nil
 	}
 	tileID := TileToID(t)
 	agariPartitions := make([]Partition, 0)
 	if h.Waits[tileID] != nil {
-		for _, partition := range h.Waits[TileToID(t)] {
-			if partition.Wait == waits.KokushiSingle {
+		for _, p := range h.Waits[TileToID(t)] {
+			if p.Wait == waits.KokushiSingle {
 				newMentsu, _ := CreateMentsu([]Tile{*t}, false)
-				partition.Mentsu = append(partition.Mentsu, *newMentsu)
+				p.Mentsu = append(p.Mentsu, *newMentsu)
 			} else {
 				var condition func(m *Mentsu) bool
-				switch partition.Wait {
+				switch p.Wait {
 				case waits.Ryanmen:
 					condition = func(m *Mentsu) bool {
 						return m.Kind == groups.Ryanmen
@@ -231,15 +239,22 @@ func CheckAgari(h *Hand, t *Tile) (bool, []Partition) {
 						return m.Kind == groups.Single && m.Tiles[0].Equals(t)
 					}
 				}
-				for i := range partition.Mentsu {
-					if condition(&partition.Mentsu[i]) {
-						partition.Mentsu[i].addTile(t)
+				for i := range p.Mentsu {
+					if CheckJunseiChuuren(&p) {
+						p.Wait = waits.JunseiChuuren
+					}
+					if condition(&p.Mentsu[i]) {
+						p.Mentsu[i].addTile(t)
+						if !tsumo {
+							p.Mentsu[i].Open = true
+						}
 						break
 					}
 				}
+				AssignMentsuCounts(&p)
 			}
 			// needed or not needed based on value/reference passing...
-			agariPartitions = append(agariPartitions, partition)
+			agariPartitions = append(agariPartitions, p)
 		}
 		return true, agariPartitions
 	}
@@ -277,12 +292,6 @@ func CheckTenpai(h *Hand) (bool, []Partition, [][]int) {
 				tenpaiWaits = append(tenpaiWaits, curWaits)
 				break
 			}
-		}
-		if tenpai && CheckJunseiChuuren(&partition) {
-			// have to account for this when adding the last tile into a partition.
-			// probably keep it as a separate thing, rather than as a wait style.
-			// or, set the wait style AFTER adding the tile to the mentsu.
-			partition.Wait = waits.JunseiChuuren
 		}
 	}
 	return tenpai, tenpaiPartitions, tenpaiWaits
