@@ -1,9 +1,9 @@
 package yakuman
 
 import (
-	"riichi-calculator/src/models"
-	"riichi-calculator/src/models/yaku"
-	"riichi-calculator/src/utils"
+	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/yaku"
+	"github.com/mmuiro/riichi-base/src/utils"
 )
 
 type RyuuIisou struct{}

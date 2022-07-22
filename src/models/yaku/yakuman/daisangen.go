@@ -1,10 +1,10 @@
 package yakuman
 
 import (
-	"riichi-calculator/src/models"
-	"riichi-calculator/src/models/constants/groups"
-	"riichi-calculator/src/models/constants/suits"
-	"riichi-calculator/src/models/yaku"
+	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/suits"
+	"github.com/mmuiro/riichi-base/src/models/yaku"
 )
 
 type DaiSangen struct{}

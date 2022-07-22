@@ -1,6 +1,6 @@
 package yaku
 
-import "riichi-calculator/src/models"
+import "github.com/mmuiro/riichi-base/src/models"
 
 type Haitei struct{}
 

@@ -1,8 +1,8 @@
 package yaku
 
 import (
-	"riichi-calculator/src/models"
-	"riichi-calculator/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/groups"
 )
 
 type SanshokuDoujun struct{}

@@ -1,7 +1,7 @@
 package yaku
 
 import (
-	"riichi-calculator/src/models"
+	"github.com/mmuiro/riichi-base/src/models"
 )
 
 type ChiiToitsu struct{}

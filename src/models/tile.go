@@ -1,6 +1,6 @@
 package models
 
-import "riichi-calculator/src/models/constants/suits"
+import "github.com/mmuiro/riichi-base/src/models/constants/suits"
 
 var TileToString = [34]string{
 	"🀇", "🀈", "🀉", "🀊", "🀋", "🀌", "🀍", "🀎", "🀏",

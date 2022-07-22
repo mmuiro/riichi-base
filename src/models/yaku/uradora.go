@@ -2,7 +2,8 @@ package yaku
 
 import (
 	"fmt"
-	"riichi-calculator/src/models"
+
+	"github.com/mmuiro/riichi-base/src/models"
 )
 
 type UraDora struct {

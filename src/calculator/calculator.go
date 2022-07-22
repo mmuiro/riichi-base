@@ -3,12 +3,13 @@ package calculator
 import (
 	"fmt"
 	"math"
-	"riichi-calculator/src/models"
-	"riichi-calculator/src/models/constants/groups"
-	"riichi-calculator/src/models/constants/suits"
-	"riichi-calculator/src/models/constants/waits"
-	"riichi-calculator/src/models/yaku"
-	"riichi-calculator/src/models/yaku/yakuman"
+
+	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/suits"
+	"github.com/mmuiro/riichi-base/src/models/constants/waits"
+	"github.com/mmuiro/riichi-base/src/models/yaku"
+	"github.com/mmuiro/riichi-base/src/models/yaku/yakuman"
 )
 
 type NoAgariError struct {
@@ -25,6 +26,14 @@ type NoYakuError struct {
 
 func (e *NoYakuError) Error() string {
 	return fmt.Sprintf("The hand %s has no yaku.", e.h.String())
+}
+
+func roundUp(val int, inc int) int {
+	r := val % inc
+	if r > 0 {
+		return val + inc - r
+	}
+	return val
 }
 
 // Returns the calculated fu for the given partition and conditions.
@@ -209,13 +218,26 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) (int, []ya
 		}
 		return score, yakuList, nil, han, fu, ScoreLevelToString[slevel]
 	}
-
 }
 
-func roundUp(val int, inc int) int {
-	r := val % inc
-	if r > 0 {
-		return val + inc - r
-	}
-	return val
+/* WIP */
+
+func CalculateHandShanten(h *models.Hand) int {
+	return 0
+}
+
+func calculatePartitionShanten(p *models.Partition) int {
+	return 0
+}
+
+func calculateStandardShanten(p *models.Partition) int {
+	return 0
+}
+
+func calculateChiiToitsuShanten(p *models.Partition) int {
+	return 0
+}
+
+func calculateKokushiShanten(p *models.Partition) int {
+	return 0
 }

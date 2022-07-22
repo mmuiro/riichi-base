@@ -1,6 +1,6 @@
 package yaku
 
-import "riichi-calculator/src/models/constants/suits"
+import "github.com/mmuiro/riichi-base/src/models/constants/suits"
 
 type Conditions struct {
 	Tsumo        bool
@@ -14,7 +14,6 @@ type Conditions struct {
 	Chankan      bool
 	Tenhou       bool
 	Chiihou      bool
-	Nagashi      bool
 	Bakaze       suits.Suit
 	Jikaze       suits.Suit
 	Dora         []int

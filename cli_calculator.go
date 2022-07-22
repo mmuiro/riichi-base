@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"riichi-calculator/src/calculator"
-	"riichi-calculator/src/models"
-	"riichi-calculator/src/models/constants/suits"
-	"riichi-calculator/src/models/yaku"
-	"riichi-calculator/src/models/yaku/yakuman"
-	"riichi-calculator/src/utils"
 	"strings"
 	"time"
+
+	"github.com/mmuiro/riichi-base/src/calculator"
+	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/suits"
+	"github.com/mmuiro/riichi-base/src/models/yaku"
+	"github.com/mmuiro/riichi-base/src/models/yaku/yakuman"
+	"github.com/mmuiro/riichi-base/src/utils"
 )
 
 func main() {

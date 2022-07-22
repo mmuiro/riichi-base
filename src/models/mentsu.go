@@ -1,10 +1,11 @@
 package models
 
 import (
-	"riichi-calculator/src/models/constants/groups"
-	"riichi-calculator/src/models/constants/suits"
 	"sort"
 	"strings"
+
+	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 )
 
 type MultipleSuitError struct{}

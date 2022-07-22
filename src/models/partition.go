@@ -1,11 +1,12 @@
 package models
 
 import (
-	"riichi-calculator/src/models/constants/groups"
-	"riichi-calculator/src/models/constants/waits"
-	"riichi-calculator/src/utils"
 	"sort"
 	"strings"
+
+	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/waits"
+	"github.com/mmuiro/riichi-base/src/utils"
 )
 
 type Partition struct {

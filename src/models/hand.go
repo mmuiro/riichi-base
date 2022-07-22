@@ -3,13 +3,14 @@ package models
 import (
 	"fmt"
 	"regexp"
-	"riichi-calculator/src/models/constants/groups"
-	"riichi-calculator/src/models/constants/suits"
-	"riichi-calculator/src/models/constants/waits"
-	"riichi-calculator/src/utils"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/suits"
+	"github.com/mmuiro/riichi-base/src/models/constants/waits"
+	"github.com/mmuiro/riichi-base/src/utils"
 )
 
 type Hand struct {
@@ -200,6 +201,8 @@ func TilesToString(tiles []Tile) string {
 	return ret
 }
 
+/* Checks if the given hand, on the last tile t, is a winning hand (和了).
+Assumes the hand's waits are already set from calling CheckTenpai. */
 func CheckAgari(h *Hand, t *Tile, tsumo bool) (bool, []Partition) {
 	if !h.Tenpai {
 		return false, nil

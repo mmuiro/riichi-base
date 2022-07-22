@@ -1,8 +1,8 @@
 package yaku
 
 import (
-	"riichi-calculator/src/models"
-	"riichi-calculator/src/utils"
+	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/utils"
 )
 
 type Chinitsu struct{}

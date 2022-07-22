@@ -1,8 +1,8 @@
 package yaku
 
 import (
-	"riichi-calculator/src/models"
-	"riichi-calculator/src/models/constants/suits"
+	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 )
 
 type Honitsu struct{}
