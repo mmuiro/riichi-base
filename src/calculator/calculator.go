@@ -28,6 +28,26 @@ func (e *NoYakuError) Error() string {
 	return fmt.Sprintf("The hand %s has no yaku.", e.h.String())
 }
 
+type InvalidAgariHandError struct {
+	h *models.Hand
+	w *models.Tile
+}
+
+func (e *InvalidAgariHandError) Error() string {
+	return fmt.Sprintf("The hand %s is not complete with the tile %s.", e.h.String(), e.w.String())
+}
+
+type Score struct {
+	Points            int
+	WinningPartition  *models.Partition
+	YakuList          []yaku.Yaku
+	YakumanList       []yakuman.Yakuman
+	YakumanMultiplier int
+	Han               int
+	Fu                int
+	ScoreLevel        string
+}
+
 func roundUp(val int, inc int) int {
 	r := val % inc
 	if r > 0 {
@@ -106,54 +126,66 @@ func FindYakuman(p *models.Partition, c *yaku.Conditions) (int, []yakuman.Yakuma
 }
 
 func CalculateScore(h *models.Hand, w *models.Tile, c *yaku.Conditions) (int, error) {
-	score, _, _, _, _, _, _, err := CalculateScoreVerbose(h, w, c)
+	score, err := CalculateScoreVerbose(h, w, c)
 	if err != nil {
 		return 0, err
 	}
-	return score, nil
+	return score.Points, nil
 }
 
-func CalculateScoreVerbose(h *models.Hand, w *models.Tile, c *yaku.Conditions) (int, *models.Partition, []yaku.Yaku, []yakuman.Yakuman, int, int, string, error) {
+func CalculateScoreVerbose(h *models.Hand, w *models.Tile, c *yaku.Conditions) (*Score, error) {
+	if w == nil {
+		return &Score{Points: 0}, &NoAgariError{h: h}
+	}
+	if !h.Tenpai {
+		err := h.RemoveTile(w)
+		if err != nil {
+			return &Score{Points: 0}, &InvalidAgariHandError{h: h, w: w}
+		}
+		var waitMaps [][]int
+		var tenpaiPartitions []models.Partition
+		h.Tenpai, tenpaiPartitions, waitMaps = models.CheckTenpai(h)
+		if !h.Tenpai {
+			return &Score{Points: 0}, &NoAgariError{h: h}
+		}
+		models.AssignWaitMap(h, tenpaiPartitions, waitMaps)
+	}
 	agari, partitions := models.CheckAgari(h, w, c.Tsumo)
 	if !agari {
-		return 0, nil, nil, nil, 0, 0, "", &NoAgariError{h: h}
+		return &Score{Points: 0}, &NoAgariError{h: h}
 	}
-	maxScore := 0
-	var maxPartition models.Partition
-	var maxYakuList []yaku.Yaku
-	var maxYakumanList []yakuman.Yakuman
-	var maxSLevel string
-	var maxHan, maxFu int
+	maxPoints := 0
+	var bestScore *Score
 	for _, p := range partitions {
-		score, yakuList, yakumanList, han, fu, slevel := calculatePartitionScore(&p, c)
-		if score > maxScore {
-			maxScore, maxPartition, maxYakuList, maxYakumanList, maxSLevel = score, p, yakuList, yakumanList, slevel
-			maxHan, maxFu = han, fu
+		score := calculatePartitionScore(&p, c)
+		if score.Points > maxPoints {
+			bestScore = score
+			maxPoints = score.Points
 		}
 	}
-	if maxScore == 0 {
-		return 0, nil, nil, nil, 0, 0, "", &NoYakuError{h: h}
+	if maxPoints == 0 {
+		return &Score{Points: 0}, &NoYakuError{h: h}
 	}
-	return maxScore, &maxPartition, maxYakuList, maxYakumanList, maxHan, maxFu, maxSLevel, nil
+	return bestScore, nil
 }
 
-func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) (int, []yaku.Yaku, []yakuman.Yakuman, int, int, string) {
+func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) *Score {
 	yakumanMultiplier, yakumanList := FindYakuman(p, c)
-	score := 0
+	points := 0
 	// has a yakuman
 	if yakumanMultiplier > 0 {
 		if c.Jikaze == suits.Ton {
-			score = 6 * ScoreLevelToBasicPoints[Yakuman]
+			points = 6 * ScoreLevelToBasicPoints[Yakuman]
 		} else {
-			score = 4 * ScoreLevelToBasicPoints[Yakuman]
+			points = 4 * ScoreLevelToBasicPoints[Yakuman]
 		}
-		return yakumanMultiplier * score, nil, yakumanList, 0, 0, "Yakuman"
+		return &Score{Points: yakumanMultiplier * points, WinningPartition: p, YakumanList: yakumanList, YakumanMultiplier: yakumanMultiplier, ScoreLevel: "Yakuman"}
 	} else {
 		// Find the han
 		han, yakuList := FindHanAndYaku(p, c)
 		var fu int
 		if han == 0 {
-			return 0, nil, nil, 0, 0, ""
+			return &Score{Points: 0}
 		}
 		// if the hand has yaku, add dora and red dora, and uradora if menzenchin
 		dora, akadora, uradora := 0, 0, 0
@@ -191,9 +223,9 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) (int, []ya
 		if han > 4 {
 			basicPoints := ScoreLevelToBasicPoints[slevel]
 			if c.Jikaze == suits.Ton {
-				score = 6 * basicPoints
+				points = 6 * basicPoints
 			} else {
-				score = 4 * basicPoints
+				points = 4 * basicPoints
 			}
 		} else {
 			fu = CalculateFu(p, c)
@@ -204,19 +236,19 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) (int, []ya
 			}
 			if c.Jikaze == suits.Ton {
 				if c.Tsumo {
-					score = 3 * roundUp(2*basicPoints, 100)
+					points = 3 * roundUp(2*basicPoints, 100)
 				} else {
-					score = roundUp(6*basicPoints, 100)
+					points = roundUp(6*basicPoints, 100)
 				}
 			} else {
 				if c.Tsumo {
-					score = 2*roundUp(basicPoints, 100) + roundUp(2*basicPoints, 100)
+					points = 2*roundUp(basicPoints, 100) + roundUp(2*basicPoints, 100)
 				} else {
-					score = roundUp(4*basicPoints, 100)
+					points = roundUp(4*basicPoints, 100)
 				}
 			}
 		}
-		return score, yakuList, nil, han, fu, ScoreLevelToString[slevel]
+		return &Score{Points: points, WinningPartition: p, YakuList: yakuList, Han: han, Fu: fu, ScoreLevel: ScoreLevelToString[slevel]}
 	}
 }
 

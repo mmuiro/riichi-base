@@ -12,7 +12,6 @@ import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 	"github.com/mmuiro/riichi-base/src/models/yaku"
-	"github.com/mmuiro/riichi-base/src/models/yaku/yakuman"
 	"github.com/mmuiro/riichi-base/src/utils"
 )
 
@@ -26,44 +25,33 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		} else {
+			hand.RemoveTile(lastTile)
 			fmt.Println(hand)
 			start := time.Now()
-			if lastTile != nil {
-				err = hand.RemoveTile(lastTile)
-				if err != nil {
-					fmt.Println(err)
-					continue
-				}
-			}
 			if found, tenpais, waitLists := models.CheckTenpai(hand); found {
+				c := yaku.Conditions{Menzenchin: false, Jikaze: suits.Nan, Bakaze: suits.Nan, Tsumo: false, Dora: []int{models.SuitAndValueToID(suits.Chun, 0)}} // should be customizable
 				models.AssignWaitMap(hand, tenpais, waitLists)
 				hand.Tenpai = true
 				if lastTile != nil {
 					// calculate the score, if possible (hand has agari)
-					c := yaku.Conditions{Menzenchin: false, Jikaze: suits.Nan, Bakaze: suits.Nan, Tsumo: false, Dora: []int{models.SuitAndValueToID(suits.Chun, 0)}} // should be customizable
-					var score int
-					var best *models.Partition
-					var yakuList []yaku.Yaku
-					var yakumanList []yakuman.Yakuman
-					var slevel string
-					var han, fu int
-					score, best, yakuList, yakumanList, han, fu, slevel, err = calculator.CalculateScoreVerbose(hand, lastTile, &c)
+					var score *calculator.Score
+					score, err = calculator.CalculateScoreVerbose(hand, lastTile, &c)
 					if err != nil {
 						fmt.Println(err)
 						continue
 					} else {
-						fmt.Println(best)
-						if len(yakumanList) > 0 {
-							for _, y := range yakumanList {
+						fmt.Println(score.WinningPartition)
+						if len(score.YakumanList) > 0 {
+							for _, y := range score.YakumanList {
 								fmt.Printf("%s\n", y.Name())
 							}
 						} else {
-							for _, y := range yakuList {
+							for _, y := range score.YakuList {
 								fmt.Printf("%s - %d han\n", y.Name(), y.Han(!c.Menzenchin))
 							}
-							fmt.Printf("%d han", han)
-							if fu > 0 {
-								fmt.Printf(" %d fu", fu)
+							fmt.Printf("%d han", score.Han)
+							if score.Fu > 0 {
+								fmt.Printf(" %d fu", score.Fu)
 							}
 							fmt.Println()
 						}
@@ -78,10 +66,10 @@ func main() {
 							pre += "Ron"
 						}
 						fmt.Println(pre)
-						if slevel != "" {
-							fmt.Printf("%s - %d pts\n", slevel, score)
+						if score.ScoreLevel != "" {
+							fmt.Printf("%s - %d pts\n", score.ScoreLevel, score.Points)
 						} else {
-							fmt.Printf("%d pts\n", score)
+							fmt.Printf("%d pts\n", score.Points)
 						}
 					}
 				} else {

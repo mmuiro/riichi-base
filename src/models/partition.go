@@ -15,7 +15,7 @@ type Partition struct {
 	Wait         waits.WaitKind
 }
 
-func (p *Partition) String() string {
+func (p Partition) String() string {
 	mentsuStrings := make([]string, len(p.Mentsu))
 	for i, mentsu := range p.Mentsu {
 		mentsuStrings[i] = mentsu.String()
