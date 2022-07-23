@@ -1,8 +1,6 @@
 package yaku
 
 import (
-	"fmt"
-
 	"github.com/mmuiro/riichi-base/src/models"
 )
 
@@ -19,5 +17,5 @@ func (y Dora) Description() string {
 }
 
 func (y Dora) Name() string {
-	return fmt.Sprintf("Dora %d", y.Count)
+	return "Dora"
 }

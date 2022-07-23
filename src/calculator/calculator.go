@@ -218,8 +218,8 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) *Score {
 			yakuList = append(yakuList, yaku.UraDora{Count: uradora})
 		}
 		han += akadora + dora + uradora
-		// if han is 5 or more, don't calculate fu
 		slevel := HanToScoreLevel(han)
+		fu = CalculateFu(p, c)
 		if han > 4 {
 			basicPoints := ScoreLevelToBasicPoints[slevel]
 			if c.Jikaze == suits.Ton {
@@ -228,7 +228,6 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) *Score {
 				points = 4 * basicPoints
 			}
 		} else {
-			fu = CalculateFu(p, c)
 			basicPoints := fu * int(math.Pow(2, float64(2+han)))
 			if basicPoints >= 2000 {
 				basicPoints = 2000

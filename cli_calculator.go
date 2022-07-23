@@ -29,7 +29,7 @@ func main() {
 			fmt.Println(hand)
 			start := time.Now()
 			if found, tenpais, waitLists := models.CheckTenpai(hand); found {
-				c := yaku.Conditions{Menzenchin: false, Jikaze: suits.Nan, Bakaze: suits.Nan, Tsumo: false, Dora: []int{models.SuitAndValueToID(suits.Chun, 0)}} // should be customizable
+				c := yaku.Conditions{Menzenchin: false, Jikaze: suits.Ton, Bakaze: suits.Ton, Tsumo: true, Dora: []int{models.SuitAndValueToID(suits.Man, 1)}, UraDora: []int{models.SuitAndValueToID(suits.Chun, 0)}} // should be customizable
 				models.AssignWaitMap(hand, tenpais, waitLists)
 				hand.Tenpai = true
 				if lastTile != nil {
