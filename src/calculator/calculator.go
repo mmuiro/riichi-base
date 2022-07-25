@@ -251,6 +251,24 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) *Score {
 	}
 }
 
+// Returns a slice of tile IDs corresponding to the tiles the hand is waiting on, if it is in tenpai. Only
+func CalculateWaitTiles(h *models.Hand) []int {
+	tenpai, _, waitLists := models.CheckTenpai(h)
+	waits := make([]int, 0)
+	hits := make([]bool, 34)
+	if tenpai {
+		for _, waitList := range waitLists {
+			for _, tileID := range waitList {
+				if !hits[tileID] {
+					waits = append(waits, tileID)
+					hits[tileID] = true
+				}
+			}
+		}
+	}
+	return waits
+}
+
 /* WIP */
 
 func CalculateHandShanten(h *models.Hand) int {

@@ -14,16 +14,29 @@ import (
 )
 
 type Hand struct {
-	Tiles              []Tile
+	ClosedTiles        []Tile
 	Tenpai             bool
 	Waits              map[int][]Partition
 	Melds              []Mentsu
 	effectiveTileCount int
 }
 
+func (h *Hand) Tiles() []Tile {
+	tiles := make([]Tile, 0)
+	for _, tile := range h.ClosedTiles {
+		tiles = append(tiles, tile)
+	}
+	for _, mentsu := range h.Melds {
+		for _, tile := range mentsu.Tiles {
+			tiles = append(tiles, tile)
+		}
+	}
+	return tiles
+}
+
 func (h *Hand) String() string {
-	tileStrings := make([]string, len(h.Tiles))
-	for i, tile := range h.Tiles {
+	tileStrings := make([]string, len(h.Tiles()))
+	for i, tile := range h.Tiles() {
 		tileStrings[i] = tile.String()
 	}
 	return strings.Join(tileStrings, " ")
@@ -59,13 +72,15 @@ func CreateHand(tiles []Tile, melds []Mentsu) *Hand {
 	sort.Slice(tiles, func(i, j int) bool {
 		return TileToID(&tiles[i]) < TileToID(&tiles[j])
 	})
-	h := &Hand{Tiles: tiles, Melds: melds}
+	h := &Hand{ClosedTiles: tiles, Melds: melds}
 	return h
 }
 
 /* Takes a string and coverts it into a hand. */
 func StringToHand(s string) (*Hand, *Tile, error) {
-	tiles, melds := make([]Tile, 0), make([]Mentsu, 0)
+	tileCount, melds := 0, make([]Mentsu, 0)
+	var closedTiles []Tile
+	var err error
 	kans, redCounts := 0, make(map[suits.Suit]int)
 	r := regexp.MustCompile(`\s+`)
 	parts := r.Split(s, -1)
@@ -73,19 +88,19 @@ func StringToHand(s string) (*Hand, *Tile, error) {
 	for i, part := range parts {
 		if i == 0 {
 			// closed portion of the hand
-			closedTiles, _, err := parsePartToTiles(part, redCounts, false)
+			closedTiles, _, err = parsePartToTiles(part, redCounts, false)
 			if err != nil {
 				return nil, nil, err
 			}
-			tiles = append(tiles, closedTiles...)
-			lastTile = tiles[len(tiles)-1]
+			tileCount += len(closedTiles)
+			lastTile = closedTiles[len(closedTiles)-1]
 		} else {
 			// melds (pon, chii). kans can be specified as closed; otherwise, they are open.
 			var meldTiles []Tile
 			var open bool
 			var err error
 			meldTiles, open, err = parsePartToTiles(part, redCounts, true)
-			tiles = append(tiles, meldTiles...)
+			tileCount += len(meldTiles)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -101,11 +116,11 @@ func StringToHand(s string) (*Hand, *Tile, error) {
 		}
 	}
 	// still need to deal with kans...
-	effectiveTileCount := len(tiles) - kans
+	effectiveTileCount := tileCount - kans
 	if effectiveTileCount != 13 && effectiveTileCount != 14 {
 		return nil, nil, &InvalidHandError{}
 	}
-	hand := CreateHand(tiles, melds)
+	hand := CreateHand(closedTiles, melds)
 	if effectiveTileCount == 14 {
 		return hand, &lastTile, nil
 	}
@@ -265,7 +280,7 @@ func CheckAgari(h *Hand, t *Tile, tsumo bool) (bool, []Partition) {
 }
 
 func CheckComplete(h *Hand) (bool, []Partition) {
-	if len(h.Tiles) < 14 {
+	if len(h.Tiles()) < 14 {
 		return false, nil
 	}
 	// checking arbitrary hands (i.e. from calculator)
@@ -310,19 +325,21 @@ func AssignWaitMap(h *Hand, partitions []Partition, waitsList [][]int) error {
 	return nil
 }
 
+// Remove a tile from the closed portion of a hand.
 func (h *Hand) RemoveTile(t *Tile) error {
-	if i := getTileIndex(h.Tiles, t.Suit, t.Value); i > -1 {
-		h.Tiles = utils.RemoveIndex(h.Tiles, i)
+	if i := getTileIndex(h.ClosedTiles, t.Suit, t.Value); i > -1 {
+		h.ClosedTiles = utils.RemoveIndex(h.ClosedTiles, i)
 		// check if the hand is still valid
 		return nil
 	}
 	return &MissingTileError{}
 }
 
+// Add a tile to the closed portion of a hand.
 func (h *Hand) AddTile(t *Tile) error {
-	h.Tiles = append(h.Tiles, *t)
-	sort.Slice(h.Tiles, func(i, j int) bool {
-		return TileToID(&h.Tiles[i]) < TileToID(&h.Tiles[j])
+	h.ClosedTiles = append(h.ClosedTiles, *t)
+	sort.Slice(h.ClosedTiles, func(i, j int) bool {
+		return TileToID(&h.ClosedTiles[i]) < TileToID(&h.ClosedTiles[j])
 	})
 	// check if the hand is still valid
 	return nil

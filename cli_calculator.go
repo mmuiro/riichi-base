@@ -25,7 +25,9 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			hand.RemoveTile(lastTile)
+			if lastTile != nil {
+				hand.RemoveTile(lastTile)
+			}
 			fmt.Println(hand)
 			start := time.Now()
 			if found, tenpais, waitLists := models.CheckTenpai(hand); found {

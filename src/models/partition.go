@@ -41,15 +41,8 @@ func (p *Partition) TileCount() int {
 
 func CalculateAllPartitions(h *Hand) []Partition {
 	results := make([]Partition, 0)
-	nonMeldTiles := make([]Tile, len(h.Tiles))
-	copy(nonMeldTiles, h.Tiles)
-	for _, meld := range h.Melds {
-		for _, tile := range meld.Tiles {
-			if i := getTileIndex(nonMeldTiles, tile.Suit, tile.Value); i > -1 {
-				nonMeldTiles = utils.RemoveIndex(nonMeldTiles, i)
-			}
-		}
-	}
+	nonMeldTiles := make([]Tile, len(h.ClosedTiles))
+	copy(nonMeldTiles, h.ClosedTiles)
 	memo := make(map[string][][]Mentsu)
 	for _, partition := range calculatePartitionsFromTiles(nonMeldTiles, memo) {
 		newPartition := Partition{Mentsu: append(partition, h.Melds...)}
