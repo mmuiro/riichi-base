@@ -3,6 +3,7 @@ package yaku
 import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 )
 
@@ -19,10 +20,9 @@ func (y YakuhaiChun) Match(p *models.Partition, c *Conditions) bool {
 
 func (y YakuhaiChun) Han(open bool) int { return 1 }
 
-func (y YakuhaiChun) Description() string {
-	return "Set of Chun."
-}
-
-func (y YakuhaiChun) Name() string {
-	return "Yakuhai: Chun"
+func (y YakuhaiChun) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Red Dragon"
+	}
+	return "役牌中"
 }

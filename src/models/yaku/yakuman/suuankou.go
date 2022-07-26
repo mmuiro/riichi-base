@@ -3,6 +3,7 @@ package yakuman
 import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/waits"
 	"github.com/mmuiro/riichi-base/src/models/yaku"
 )
@@ -23,10 +24,9 @@ func (y SuuAnkou) Value() int {
 	return 1
 }
 
-func (y SuuAnkou) Description() string {
-	return "4 concealed sets."
-}
-
-func (y SuuAnkou) Name() string {
-	return "Suu Ankou"
+func (y SuuAnkou) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Four Concealed Triplets"
+	}
+	return "四暗刻"
 }

@@ -3,6 +3,7 @@ package yaku
 import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 )
 
 type SanshokuDoukou struct{}
@@ -25,10 +26,9 @@ func (y SanshokuDoukou) Han(open bool) int {
 	return 2
 }
 
-func (y SanshokuDoukou) Description() string {
-	return "Three mixed-suits triplets of the same number."
-}
-
-func (y SanshokuDoukou) Name() string {
-	return "Sanshoku Doukou"
+func (y SanshokuDoukou) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Triple Triplets"
+	}
+	return "三色同刻"
 }

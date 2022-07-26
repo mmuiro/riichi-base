@@ -3,6 +3,7 @@ package yaku
 import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 )
 
@@ -30,10 +31,9 @@ func (y Ittsu) Han(open bool) int {
 	return 2
 }
 
-func (y Ittsu) Description() string {
-	return "A full set of 3 sequences from 1 to 9 of a single suit."
-}
-
-func (y Ittsu) Name() string {
-	return "Ittsu"
+func (y Ittsu) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Pure Straight"
+	}
+	return "一気通貫"
 }

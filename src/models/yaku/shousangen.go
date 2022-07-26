@@ -3,6 +3,7 @@ package yaku
 import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 )
 
@@ -28,10 +29,9 @@ func (y ShouSangen) Han(open bool) int {
 	return 2
 }
 
-func (y ShouSangen) Description() string {
-	return "2 sets and 1 pair of dragon tiles."
-}
-
-func (y ShouSangen) Name() string {
-	return "Shou Sangen"
+func (y ShouSangen) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Little Three Dragons"
+	}
+	return "小三元"
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/mmuiro/riichi-base/src/calculator"
 	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 	"github.com/mmuiro/riichi-base/src/models/yaku"
 	"github.com/mmuiro/riichi-base/src/utils"
@@ -45,11 +46,11 @@ func main() {
 						fmt.Println(score.WinningPartition)
 						if len(score.YakumanList) > 0 {
 							for _, y := range score.YakumanList {
-								fmt.Printf("%s\n", y.Name())
+								fmt.Printf("%s\n", y.Name(languages.EN))
 							}
 						} else {
 							for _, y := range score.YakuList {
-								fmt.Printf("%s - %d han\n", y.Name(), y.Han(!c.Menzenchin))
+								fmt.Printf("%s - %d han\n", y.Name(languages.EN), y.Han(!c.Menzenchin))
 							}
 							fmt.Printf("%d han", score.Han)
 							if score.Fu > 0 {

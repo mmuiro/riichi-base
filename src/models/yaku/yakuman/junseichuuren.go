@@ -2,6 +2,7 @@ package yakuman
 
 import (
 	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/waits"
 	"github.com/mmuiro/riichi-base/src/models/yaku"
 )
@@ -33,10 +34,9 @@ func (y JunseiChuuren) Value() int {
 	return 2
 }
 
-func (y JunseiChuuren) Description() string {
-	return "Nine gates, 1112345678999+X pattern of one suit, 1-9 wait."
-}
-
-func (y JunseiChuuren) Name() string {
-	return "Junsei Chuuren Poutou"
+func (y JunseiChuuren) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Pure Nine Gates"
+	}
+	return "純正九蓮宝燈"
 }

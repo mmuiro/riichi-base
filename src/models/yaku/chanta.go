@@ -2,6 +2,7 @@ package yaku
 
 import (
 	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 )
 
 type Chanta struct{}
@@ -28,10 +29,9 @@ func (y Chanta) Han(open bool) int {
 	return 2
 }
 
-func (y Chanta) Description() string {
-	return "All groups have 1 or more terminals or honors in them."
-}
-
-func (y Chanta) Name() string {
-	return "Chanta"
+func (y Chanta) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Half Outside Hand"
+	}
+	return "全帯幺九"
 }

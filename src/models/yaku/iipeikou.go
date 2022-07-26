@@ -3,6 +3,7 @@ package yaku
 import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 )
 
 type Iipeikou struct{}
@@ -28,10 +29,9 @@ func (y Iipeikou) Match(p *models.Partition, c *Conditions) bool {
 
 func (y Iipeikou) Han(open bool) int { return 1 }
 
-func (y Iipeikou) Description() string {
-	return "Two identical sequences on a closed hand."
-}
-
-func (y Iipeikou) Name() string {
-	return "Iipeikou"
+func (y Iipeikou) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Pure Double Sequence"
+	}
+	return "一盃口"
 }

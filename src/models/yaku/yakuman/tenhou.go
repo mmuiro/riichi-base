@@ -2,6 +2,7 @@ package yakuman
 
 import (
 	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/yaku"
 )
 
@@ -15,10 +16,9 @@ func (y Tenhou) Value() int {
 	return 1
 }
 
-func (y Tenhou) Description() string {
-	return "Complete hand at dealer's first turn."
-}
-
-func (y Tenhou) Name() string {
-	return "Tenhou"
+func (y Tenhou) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Heaven's Blessing"
+	}
+	return "天和"
 }

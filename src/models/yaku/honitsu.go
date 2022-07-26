@@ -2,6 +2,7 @@ package yaku
 
 import (
 	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 )
 
@@ -31,10 +32,9 @@ func (y Honitsu) Han(open bool) int {
 	return 3
 }
 
-func (y Honitsu) Description() string {
-	return "Half flush of a suit."
-}
-
-func (y Honitsu) Name() string {
-	return "Honitsu"
+func (y Honitsu) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Half Flush"
+	}
+	return "混一色"
 }

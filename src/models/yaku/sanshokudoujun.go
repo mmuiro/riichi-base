@@ -3,6 +3,7 @@ package yaku
 import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 )
 
 type SanshokuDoujun struct{}
@@ -28,10 +29,9 @@ func (y SanshokuDoujun) Han(open bool) int {
 	return 2
 }
 
-func (y SanshokuDoujun) Description() string {
-	return "Two identical sequences on a closed hand."
-}
-
-func (y SanshokuDoujun) Name() string {
-	return "Sanshoku Doujun"
+func (y SanshokuDoujun) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Triple Mixed Sequence"
+	}
+	return "三色同順"
 }

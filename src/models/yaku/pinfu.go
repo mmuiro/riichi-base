@@ -3,6 +3,7 @@ package yaku
 import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 	"github.com/mmuiro/riichi-base/src/models/constants/waits"
 )
@@ -22,10 +23,9 @@ func (y Pinfu) Match(p *models.Partition, c *Conditions) bool {
 
 func (y Pinfu) Han(open bool) int { return 1 }
 
-func (y Pinfu) Description() string {
-	return "Win on a ryanmen, with no yakuhai/fanpai tiles in hand."
-}
-
-func (y Pinfu) Name() string {
-	return "Pinfu"
+func (y Pinfu) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Pinfu"
+	}
+	return "平和"
 }

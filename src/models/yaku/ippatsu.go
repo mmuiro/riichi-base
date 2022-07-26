@@ -1,6 +1,9 @@
 package yaku
 
-import "github.com/mmuiro/riichi-base/src/models"
+import (
+	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
+)
 
 type Ippatsu struct{}
 
@@ -8,10 +11,9 @@ func (y Ippatsu) Match(p *models.Partition, c *Conditions) bool { return c.Ippat
 
 func (y Ippatsu) Han(open bool) int { return 1 }
 
-func (y Ippatsu) Description() string {
-	return "Win on or before your next draw after calling riichi, without others calling tiles."
-}
-
-func (y Ippatsu) Name() string {
-	return "Ippatsu"
+func (y Ippatsu) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Ippatsu"
+	}
+	return "一発"
 }

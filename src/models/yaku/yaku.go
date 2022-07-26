@@ -1,12 +1,14 @@
 package yaku
 
-import "github.com/mmuiro/riichi-base/src/models"
+import (
+	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
+)
 
 type Yaku interface {
 	Match(p *models.Partition, c *Conditions) bool
 	Han(open bool) int
-	Name() string
-	Description() string
+	Name(l languages.Language) string
 }
 
 var AllYaku = []Yaku{

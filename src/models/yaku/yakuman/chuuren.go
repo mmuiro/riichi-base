@@ -2,6 +2,7 @@ package yakuman
 
 import (
 	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/waits"
 	"github.com/mmuiro/riichi-base/src/models/yaku"
 )
@@ -33,10 +34,9 @@ func (y Chuuren) Value() int {
 	return 1
 }
 
-func (y Chuuren) Description() string {
-	return "Nine gates, 1112345678999+X pattern of one suit."
-}
-
-func (y Chuuren) Name() string {
-	return "Chuuren Poutou"
+func (y Chuuren) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Nine Gates"
+	}
+	return "九連宝燈"
 }

@@ -1,6 +1,9 @@
 package yaku
 
-import "github.com/mmuiro/riichi-base/src/models"
+import (
+	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
+)
 
 type MenzenTsumo struct{}
 
@@ -10,10 +13,9 @@ func (y MenzenTsumo) Match(p *models.Partition, c *Conditions) bool {
 
 func (y MenzenTsumo) Han(open bool) int { return 1 }
 
-func (y MenzenTsumo) Description() string {
-	return "Tsumo on a closed hand."
-}
-
-func (y MenzenTsumo) Name() string {
-	return "Menzenchin Tsumo"
+func (y MenzenTsumo) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Fully Concealed Hand"
+	}
+	return "門前清自摸和"
 }

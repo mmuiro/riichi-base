@@ -3,6 +3,7 @@ package yakuman
 import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 	"github.com/mmuiro/riichi-base/src/models/yaku"
 )
@@ -30,10 +31,9 @@ func (y ShouSuushii) Value() int {
 	return 1
 }
 
-func (y ShouSuushii) Description() string {
-	return "3 sets and 1 pair of winds."
-}
-
-func (y ShouSuushii) Name() string {
-	return "Shou Suu Shii"
+func (y ShouSuushii) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Four Little Winds"
+	}
+	return "小四喜"
 }

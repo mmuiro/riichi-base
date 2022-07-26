@@ -2,6 +2,7 @@ package yakuman
 
 import (
 	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/yaku"
 	"github.com/mmuiro/riichi-base/src/utils"
 )
@@ -18,10 +19,9 @@ func (y TsuuIisou) Value() int {
 	return 1
 }
 
-func (y TsuuIisou) Description() string {
-	return "All honors."
-}
-
-func (y TsuuIisou) Name() string {
-	return "Tsuuiisou"
+func (y TsuuIisou) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "All Honors"
+	}
+	return "字一色"
 }

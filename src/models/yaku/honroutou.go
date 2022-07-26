@@ -2,6 +2,7 @@ package yaku
 
 import (
 	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/utils"
 )
 
@@ -16,10 +17,9 @@ func (y HonRoutou) Match(p *models.Partition, c *Conditions) bool {
 
 func (y HonRoutou) Han(open bool) int { return 2 }
 
-func (y HonRoutou) Description() string {
-	return "All terminals/honors."
-}
-
-func (y HonRoutou) Name() string {
-	return "Honroutou"
+func (y HonRoutou) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "All Terminals and Honors"
+	}
+	return "混老頭"
 }

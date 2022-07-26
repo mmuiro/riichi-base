@@ -2,6 +2,7 @@ package yaku
 
 import (
 	"github.com/mmuiro/riichi-base/src/models"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 )
 
 type JunchanTaiyao struct{}
@@ -28,10 +29,9 @@ func (y JunchanTaiyao) Han(open bool) int {
 	return 3
 }
 
-func (y JunchanTaiyao) Description() string {
-	return "All groups contain at least 1 terminal."
-}
-
-func (y JunchanTaiyao) Name() string {
-	return "Jun Chantaiyao"
+func (y JunchanTaiyao) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Fully Outside Hand"
+	}
+	return "純全帯么"
 }

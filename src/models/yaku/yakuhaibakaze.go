@@ -3,6 +3,7 @@ package yaku
 import (
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 )
 
 type YakuhaiBakaze struct{}
@@ -18,10 +19,9 @@ func (y YakuhaiBakaze) Match(p *models.Partition, c *Conditions) bool {
 
 func (y YakuhaiBakaze) Han(open bool) int { return 1 }
 
-func (y YakuhaiBakaze) Description() string {
-	return "Set of Round Wind."
-}
-
-func (y YakuhaiBakaze) Name() string {
-	return "Yakuhai: Round Wind"
+func (y YakuhaiBakaze) Name(l languages.Language) string {
+	if l == languages.EN {
+		return "Round Wind"
+	}
+	return "役牌：場風牌"
 }
