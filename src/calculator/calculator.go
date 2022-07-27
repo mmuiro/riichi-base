@@ -53,7 +53,13 @@ func (s *Score) ScoreLevelName(l languages.Language) string {
 	yakumanPrefixesByLanguage := [][]string{YakumanMultiplierNamesEN, YakumanMultiplierNamesJA}
 	scoreLevelsByLanguage := []map[ScoreLevel]string{ScoreLevelToStringEN, ScoreLevelToStringJA}
 	if s.YakumanMultiplier > 0 {
-		return yakumanPrefixesByLanguage[l][s.YakumanMultiplier-1] + "Yakuman"
+		var base string
+		if l == languages.EN {
+			base = "Yakuman"
+		} else {
+			base = "役満"
+		}
+		return yakumanPrefixesByLanguage[l][s.YakumanMultiplier-1] + base
 	} else if s.Points > 0 {
 		return scoreLevelsByLanguage[l][s.Scorelevel]
 	}
