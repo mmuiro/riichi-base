@@ -6,6 +6,7 @@ import (
 
 	"github.com/mmuiro/riichi-base/src/models"
 	"github.com/mmuiro/riichi-base/src/models/constants/groups"
+	"github.com/mmuiro/riichi-base/src/models/constants/languages"
 	"github.com/mmuiro/riichi-base/src/models/constants/suits"
 	"github.com/mmuiro/riichi-base/src/models/constants/waits"
 	"github.com/mmuiro/riichi-base/src/models/yaku"
@@ -45,7 +46,18 @@ type Score struct {
 	YakumanMultiplier int
 	Han               int
 	Fu                int
-	ScoreLevel        string
+	Scorelevel        ScoreLevel
+}
+
+func (s *Score) ScoreLevelName(l languages.Language) string {
+	yakumanPrefixesByLanguage := [][]string{YakumanMultiplierNamesEN, YakumanMultiplierNamesJA}
+	scoreLevelsByLanguage := []map[ScoreLevel]string{ScoreLevelToStringEN, ScoreLevelToStringJA}
+	if s.YakumanMultiplier > 0 {
+		return yakumanPrefixesByLanguage[l][s.YakumanMultiplier-1] + "Yakuman"
+	} else if s.Points > 0 {
+		return scoreLevelsByLanguage[l][s.Scorelevel]
+	}
+	return ""
 }
 
 func roundUp(val int, inc int) int {
@@ -179,7 +191,7 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) *Score {
 		} else {
 			points = 4 * ScoreLevelToBasicPoints[Yakuman]
 		}
-		return &Score{Points: yakumanMultiplier * points, WinningPartition: p, YakumanList: yakumanList, YakumanMultiplier: yakumanMultiplier, ScoreLevel: "Yakuman"}
+		return &Score{Points: yakumanMultiplier * points, WinningPartition: p, YakumanList: yakumanList, YakumanMultiplier: yakumanMultiplier, Scorelevel: Yakuman}
 	} else {
 		// Find the han
 		han, yakuList := FindHanAndYaku(p, c)
@@ -247,7 +259,7 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) *Score {
 				}
 			}
 		}
-		return &Score{Points: points, WinningPartition: p, YakuList: yakuList, Han: han, Fu: fu, ScoreLevel: ScoreLevelToString[slevel]}
+		return &Score{Points: points, WinningPartition: p, YakuList: yakuList, Han: han, Fu: fu, Scorelevel: slevel}
 	}
 }
 

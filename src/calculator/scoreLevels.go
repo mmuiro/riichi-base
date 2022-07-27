@@ -19,13 +19,26 @@ var ScoreLevelToBasicPoints = map[ScoreLevel]int{
 	Yakuman:   8000,
 }
 
-var ScoreLevelToString = map[ScoreLevel]string{
+var YakumanMultiplierNamesEN = []string{"", "Double ", "Triple ", "Quadruple ", "Quintuple ", "Hextuple "}
+
+var YakumanMultiplierNamesJA = []string{"", "二倍", "三倍", "四倍", "五倍", "六倍"}
+
+var ScoreLevelToStringEN = map[ScoreLevel]string{
 	Low:       "",
 	Mangan:    "Mangan",
 	Haneman:   "Haneman",
 	Baiman:    "Baiman",
 	Sanbaiman: "Sanbaiman",
 	Yakuman:   "Yakuman",
+}
+
+var ScoreLevelToStringJA = map[ScoreLevel]string{
+	Low:       "",
+	Mangan:    "満貫",
+	Haneman:   "跳満",
+	Baiman:    "倍満",
+	Sanbaiman: "三倍満",
+	Yakuman:   "役満",
 }
 
 func HanToScoreLevel(han int) ScoreLevel {

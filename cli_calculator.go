@@ -69,8 +69,8 @@ func main() {
 							pre += "Ron"
 						}
 						fmt.Println(pre)
-						if score.ScoreLevel != "" {
-							fmt.Printf("%s - %d pts\n", score.ScoreLevel, score.Points)
+						if score.ScoreLevelName(languages.EN) != "" {
+							fmt.Printf("%s - %d pts\n", score.ScoreLevelName(languages.EN), score.Points)
 						} else {
 							fmt.Printf("%d pts\n", score.Points)
 						}
