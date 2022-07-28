@@ -46,6 +46,7 @@ type Score struct {
 	YakumanMultiplier int
 	Han               int
 	Fu                int
+	TsumoSplit        []int
 	Scorelevel        ScoreLevel
 }
 
@@ -190,6 +191,7 @@ func CalculateScoreVerbose(h *models.Hand, w *models.Tile, c *yaku.Conditions) (
 func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) *Score {
 	yakumanMultiplier, yakumanList := FindYakuman(p, c)
 	points := 0
+	var tsumoSplit []int
 	// has a yakuman
 	if yakumanMultiplier > 0 {
 		if c.Jikaze == suits.Ton {
@@ -197,7 +199,14 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) *Score {
 		} else {
 			points = 4 * ScoreLevelToBasicPoints[Yakuman]
 		}
-		return &Score{Points: yakumanMultiplier * points, WinningPartition: p, YakumanList: yakumanList, YakumanMultiplier: yakumanMultiplier, Scorelevel: Yakuman}
+		if c.Tsumo {
+			if c.Jikaze == suits.Ton {
+				tsumoSplit = []int{yakumanMultiplier * points / 3}
+			} else {
+				tsumoSplit = []int{yakumanMultiplier * points / 4, yakumanMultiplier * points / 2}
+			}
+		}
+		return &Score{Points: yakumanMultiplier * points, WinningPartition: p, YakumanList: yakumanList, YakumanMultiplier: yakumanMultiplier, Scorelevel: Yakuman, TsumoSplit: tsumoSplit}
 	} else {
 		// Find the han
 		han, yakuList := FindHanAndYaku(p, c)
@@ -254,18 +263,20 @@ func calculatePartitionScore(p *models.Partition, c *yaku.Conditions) *Score {
 			if c.Jikaze == suits.Ton {
 				if c.Tsumo {
 					points = 3 * roundUp(2*basicPoints, 100)
+					tsumoSplit = []int{points / 3}
 				} else {
 					points = roundUp(6*basicPoints, 100)
 				}
 			} else {
 				if c.Tsumo {
 					points = 2*roundUp(basicPoints, 100) + roundUp(2*basicPoints, 100)
+					tsumoSplit = []int{roundUp(basicPoints, 100), roundUp(2*basicPoints, 100)}
 				} else {
 					points = roundUp(4*basicPoints, 100)
 				}
 			}
 		}
-		return &Score{Points: points, WinningPartition: p, YakuList: yakuList, Han: han, Fu: fu, Scorelevel: slevel}
+		return &Score{Points: points, WinningPartition: p, YakuList: yakuList, Han: han, Fu: fu, Scorelevel: slevel, TsumoSplit: tsumoSplit}
 	}
 }
 
